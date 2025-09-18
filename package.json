@@ -1,0 +1,14 @@
+{
+  "name": "Todo",
+  "version": "0.0.1",
+  "homepage": "https://YunKonstantin.github.io/Todo",
+  "devDependencies": {
+    "gh-pages": "^6.3.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
+  }
+}
