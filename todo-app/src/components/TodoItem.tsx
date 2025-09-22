@@ -4,11 +4,19 @@ interface TodoItemProps {
   todo: Todo;
   onToggle: (id: number) => void;
   onDelete: (id: number) => void;
+  onEdit: (id: number) => void; // ➕ новый проп
 }
 
-const TodoItem = ({ todo, onToggle, onDelete }: TodoItemProps) => {
+const TodoItem = ({ todo, onToggle, onDelete, onEdit }: TodoItemProps) => {
   return (
-    <li style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+    <li
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+        padding: "6px 0",
+      }}
+    >
       <input
         type="checkbox"
         checked={todo.completed}
@@ -23,8 +31,24 @@ const TodoItem = ({ todo, onToggle, onDelete }: TodoItemProps) => {
         {todo.text}
       </span>
       <button
+        onClick={() => onEdit(todo.id)} // 👈 новая кнопка
+        style={{
+          color: "blue",
+          border: "none",
+          background: "transparent",
+          cursor: "pointer",
+        }}
+      >
+        ✎
+      </button>
+      <button
         onClick={() => onDelete(todo.id)}
-        style={{ color: "red", border: "none", background: "transparent" }}
+        style={{
+          color: "red",
+          border: "none",
+          background: "transparent",
+          cursor: "pointer",
+        }}
       >
         ✕
       </button>
