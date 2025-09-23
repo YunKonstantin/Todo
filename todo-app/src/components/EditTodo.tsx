@@ -10,31 +10,14 @@ const EditTodo = ({ initialText, onSave, onCancel }: EditTodoProps) => {
   const [value, setValue] = useState(initialText);
 
   const handleSave = () => {
-    if (value.trim()) {
-      onSave(value.trim());
-    }
+    if (value.trim()) onSave(value.trim());
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        className="flex-1 px-3 py-1 border rounded-md"
-      />
-      <button
-        onClick={handleSave}
-        className="px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600"
-      >
-        Сохранить
-      </button>
-      <button
-        onClick={onCancel}
-        className="px-3 py-1 bg-gray-300 rounded-md hover:bg-gray-400"
-      >
-        Отмена
-      </button>
+    <div style={{ display: "flex", gap: 8 }}>
+      <input value={value} onChange={(e) => setValue(e.target.value)} style={{ flex: 1, padding: 6 }} />
+      <button onClick={handleSave}>Сохранить</button>
+      <button onClick={onCancel}>Отмена</button>
     </div>
   );
 };
