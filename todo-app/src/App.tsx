@@ -3,37 +3,109 @@ import { useEffect, useState } from "react";
 import { loadTasks, saveTasks, type Todo } from "./utils/localStorage";
 import AddTodo from "./components/AddTodo";
 import TodoList from "./components/TodoList";
-import styled, { ThemeProvider, createGlobalStyle } from "styled-components";
+import styled, { ThemeProvider, createGlobalStyle, keyframes } from "styled-components";
 
 const GlobalStyle = createGlobalStyle<{ themeMode: "light" | "dark" }>`
   body {
     margin: 0;
-    font-family: sans-serif;
-    background-color: ${({ themeMode }) => (themeMode === "light" ? "#f5f5f5" : "#222")};
-    color: ${({ themeMode }) => (themeMode === "light" ? "#000" : "#fff")};
+    font-family: "Inter", system-ui, sans-serif;
+    background: ${({ themeMode }) =>
+      themeMode === "light"
+        ? "linear-gradient(135deg, #e0f7fa, #ffffff)"
+        : "linear-gradient(135deg, #1e1e2f, #121212)"};
+    color: ${({ themeMode }) => (themeMode === "light" ? "#111" : "#f1f1f1")};
+    transition: background 0.4s ease, color 0.3s ease;
+
+    /* центрируем весь контент */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
   }
 `;
 
 const Container = styled.div`
-  max-width: 700px;
-  margin: 0 auto;
+  max-width: 720px;
+  width: 100%;
   padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+/* анимация появления */
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+`;
+
+const Card = styled.div<{ themeMode: "light" | "dark" }>`
+  background: ${({ themeMode }) =>
+    themeMode === "light"
+      ? "rgba(255, 255, 255, 0.7)"
+      : "rgba(40, 40, 40, 0.7)"};
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  transition: background 0.3s ease;
+  width: 100%;
+  animation: ${fadeIn} 0.5s ease;
+`;
+
+const Title = styled.h1`
+  font-size: 2rem;
+  margin: 0 0 20px;
+  text-align: center;
+  font-weight: 700;
 `;
 
 const ThemeButton = styled.button<{ themeMode: "light" | "dark" }>`
-  margin-bottom: 12px;
-  padding: 6px 12px;
-  background-color: ${({ themeMode }) => (themeMode === "light" ? "#2196f3" : "#90caf9")};
-  color: ${({ themeMode }) => (themeMode === "light" ? "#fff" : "#000")};
+  margin-bottom: 16px;
+  padding: 10px 18px;
+  background: ${({ themeMode }) =>
+    themeMode === "light"
+      ? "linear-gradient(135deg, #2196f3, #64b5f6)"
+      : "linear-gradient(135deg, #90caf9, #42a5f5)"};
+  color: #fff;
+  font-weight: 600;
   border: none;
-  border-radius: 4px;
+  border-radius: 12px;
   cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+  }
 `;
 
 const FilterSortRow = styled.div`
   display: flex;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 16px;
+  margin-bottom: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+
+  select {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: border 0.2s ease;
+    &:focus {
+      outline: none;
+      border: 1px solid #2196f3;
+    }
+  }
 `;
 
 export default function App() {
@@ -59,10 +131,19 @@ export default function App() {
 
   const toggleTheme = () => setTheme(prev => (prev === "light" ? "dark" : "light"));
 
-  const addTodo = (text: string) => setTodos(prev => [...prev, { id: Date.now(), text, completed: false }]);
-  const toggleTodo = (id: number) => setTodos(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
-  const deleteTodo = (id: number) => setTodos(prev => prev.filter(t => t.id !== id));
-  const editTodo = (id: number, text: string) => setTodos(prev => prev.map(t => t.id === id ? { ...t, text } : t));
+  const addTodo = (text: string) =>
+    setTodos(prev => [...prev, { id: Date.now(), text, completed: false }]);
+
+  const toggleTodo = (id: number) =>
+    setTodos(prev =>
+      prev.map(t => (t.id === id ? { ...t, completed: !t.completed } : t))
+    );
+
+  const deleteTodo = (id: number) =>
+    setTodos(prev => prev.filter(t => t.id !== id));
+
+  const editTodo = (id: number, text: string) =>
+    setTodos(prev => prev.map(t => (t.id === id ? { ...t, text } : t)));
 
   // фильтрация
   let displayedTodos = todos;
@@ -70,7 +151,7 @@ export default function App() {
   if (filter === "incomplete") displayedTodos = displayedTodos.filter(t => !t.completed);
 
   // сортировка
-  displayedTodos = displayedTodos.sort((a, b) => 
+  displayedTodos = displayedTodos.sort((a, b) =>
     sortOrder === "newest" ? b.id - a.id : a.id - b.id
   );
 
@@ -78,38 +159,40 @@ export default function App() {
     <ThemeProvider theme={{ mode: theme }}>
       <GlobalStyle themeMode={theme} />
       <Container>
-        <ThemeButton themeMode={theme} onClick={toggleTheme}>
-          Переключить тему
-        </ThemeButton>
+        <Card themeMode={theme}>
+          <ThemeButton themeMode={theme} onClick={toggleTheme}>
+            🌗 Переключить тему
+          </ThemeButton>
 
-        <h1>📝 Todo App</h1>
+          <Title>📝 Todo App</Title>
 
-        <FilterSortRow>
-          <div>
-            <label>Фильтр: </label>
-            <select value={filter} onChange={(e) => setFilter(e.target.value as any)}>
-              <option value="all">Все</option>
-              <option value="completed">Готовые</option>
-              <option value="incomplete">Неготовые</option>
-            </select>
-          </div>
+          <FilterSortRow>
+            <div>
+              <label>Фильтр: </label>
+              <select value={filter} onChange={(e) => setFilter(e.target.value as any)}>
+                <option value="all">Все</option>
+                <option value="completed">Готовые</option>
+                <option value="incomplete">Неготовые</option>
+              </select>
+            </div>
 
-          <div>
-            <label>Сортировка: </label>
-            <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value as any)}>
-              <option value="newest">Новые сначала</option>
-              <option value="oldest">Старые сначала</option>
-            </select>
-          </div>
-        </FilterSortRow>
+            <div>
+              <label>Сортировка: </label>
+              <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value as any)}>
+                <option value="newest">Новые сначала</option>
+                <option value="oldest">Старые сначала</option>
+              </select>
+            </div>
+          </FilterSortRow>
 
-        <AddTodo onAdd={addTodo} theme={theme} />
-        <TodoList
-          todos={displayedTodos}
-          onToggle={toggleTodo}
-          onDelete={deleteTodo}
-          onEditSave={editTodo}
-        />
+          <AddTodo onAdd={addTodo} theme={theme} />
+          <TodoList
+            todos={displayedTodos}
+            onToggle={toggleTodo}
+            onDelete={deleteTodo}
+            onEditSave={editTodo}
+          />
+        </Card>
       </Container>
     </ThemeProvider>
   );
