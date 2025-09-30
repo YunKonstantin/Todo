@@ -31,7 +31,7 @@ const EditTodo = ({ initialText, onSave, onCancel }: EditTodoProps) => {
         value={value}
         onChange={(e) => {
           setValue(e.target.value);
-          setError(""); // убираем ошибку при вводе
+          setError("");
         }}
         style={{
           flex: 1,
@@ -42,12 +42,9 @@ const EditTodo = ({ initialText, onSave, onCancel }: EditTodoProps) => {
         placeholder="Введите задачу..."
       />
 
-      {error && (
-        <span style={{ color: "red", fontSize: 12 }}>{error}</span>
-      )}
+      {error && <span style={{ color: "red", fontSize: 12 }}>{error}</span>}
 
       <div style={{ display: "flex", gap: 8 }}>
-        {/* Основная синяя кнопка */}
         <button
           onClick={handleSave}
           style={{
@@ -63,7 +60,6 @@ const EditTodo = ({ initialText, onSave, onCancel }: EditTodoProps) => {
           Сохранить
         </button>
 
-        {/* Красная кнопка отмены */}
         <button
           onClick={onCancel}
           style={{

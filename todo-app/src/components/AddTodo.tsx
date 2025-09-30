@@ -4,7 +4,7 @@ import styled from "styled-components";
 
 interface AddTodoProps {
   onAdd: (text: string) => void;
-  theme?: "light" | "dark"; // тема
+  theme?: "light" | "dark"; 
 }
 
 const Container = styled.div`

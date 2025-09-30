@@ -3,7 +3,11 @@ import { useEffect, useState } from "react";
 import { loadTasks, saveTasks, type Todo } from "./utils/localStorage";
 import AddTodo from "./components/AddTodo";
 import TodoList from "./components/TodoList";
-import styled, { ThemeProvider, createGlobalStyle, keyframes } from "styled-components";
+import styled, {
+  ThemeProvider,
+  createGlobalStyle,
+  keyframes,
+} from "styled-components";
 
 const GlobalStyle = createGlobalStyle<{ themeMode: "light" | "dark" }>`
   body {
@@ -53,7 +57,7 @@ const Card = styled.div<{ themeMode: "light" | "dark" }>`
   backdrop-filter: blur(10px);
   border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
   transition: background 0.3s ease;
   width: 100%;
   animation: ${fadeIn} 0.5s ease;
@@ -78,12 +82,12 @@ const ThemeButton = styled.button<{ themeMode: "light" | "dark" }>`
   border: none;
   border-radius: 12px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
   }
 `;
 
@@ -114,7 +118,9 @@ export default function App() {
     (localStorage.getItem("theme") as "light" | "dark") || "light"
   );
 
-  const [filter, setFilter] = useState<"all" | "completed" | "incomplete">("all");
+  const [filter, setFilter] = useState<"all" | "completed" | "incomplete">(
+    "all"
+  );
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
   useEffect(() => {
@@ -129,28 +135,29 @@ export default function App() {
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  const toggleTheme = () => setTheme(prev => (prev === "light" ? "dark" : "light"));
+  const toggleTheme = () =>
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
 
   const addTodo = (text: string) =>
-    setTodos(prev => [...prev, { id: Date.now(), text, completed: false }]);
+    setTodos((prev) => [...prev, { id: Date.now(), text, completed: false }]);
 
   const toggleTodo = (id: number) =>
-    setTodos(prev =>
-      prev.map(t => (t.id === id ? { ...t, completed: !t.completed } : t))
+    setTodos((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t))
     );
 
   const deleteTodo = (id: number) =>
-    setTodos(prev => prev.filter(t => t.id !== id));
+    setTodos((prev) => prev.filter((t) => t.id !== id));
 
   const editTodo = (id: number, text: string) =>
-    setTodos(prev => prev.map(t => (t.id === id ? { ...t, text } : t)));
+    setTodos((prev) => prev.map((t) => (t.id === id ? { ...t, text } : t)));
 
-  // фильтрация
   let displayedTodos = todos;
-  if (filter === "completed") displayedTodos = displayedTodos.filter(t => t.completed);
-  if (filter === "incomplete") displayedTodos = displayedTodos.filter(t => !t.completed);
+  if (filter === "completed")
+    displayedTodos = displayedTodos.filter((t) => t.completed);
+  if (filter === "incomplete")
+    displayedTodos = displayedTodos.filter((t) => !t.completed);
 
-  // сортировка
   displayedTodos = displayedTodos.sort((a, b) =>
     sortOrder === "newest" ? b.id - a.id : a.id - b.id
   );
@@ -169,7 +176,10 @@ export default function App() {
           <FilterSortRow>
             <div>
               <label>Фильтр: </label>
-              <select value={filter} onChange={(e) => setFilter(e.target.value as any)}>
+              <select
+                value={filter}
+                onChange={(e) => setFilter(e.target.value as any)}
+              >
                 <option value="all">Все</option>
                 <option value="completed">Готовые</option>
                 <option value="incomplete">Неготовые</option>
@@ -178,7 +188,10 @@ export default function App() {
 
             <div>
               <label>Сортировка: </label>
-              <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value as any)}>
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value as any)}
+              >
                 <option value="newest">Новые сначала</option>
                 <option value="oldest">Старые сначала</option>
               </select>
