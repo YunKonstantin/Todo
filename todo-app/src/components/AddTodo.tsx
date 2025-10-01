@@ -4,7 +4,7 @@ import styled from "styled-components";
 
 interface AddTodoProps {
   onAdd: (text: string) => void;
-  theme?: "light" | "dark"; 
+  theme?: "light" | "dark";
 }
 
 const Container = styled.div`
@@ -22,27 +22,32 @@ const InputRow = styled.div`
 const Input = styled.input<{ themeMode: "light" | "dark" }>`
   flex: 1;
   padding: 8px;
-  border: 1px solid ${({ themeMode }) => (themeMode === "light" ? "#ccc" : "#555")};
+  border: 1px solid
+    ${({ themeMode }) => (themeMode === "light" ? "#ccc" : "#555")};
   border-radius: 4px;
-  background-color: ${({ themeMode }) => (themeMode === "light" ? "#fff" : "#333")};
+  background-color: ${({ themeMode }) =>
+    themeMode === "light" ? "#fff" : "#333"};
   color: ${({ themeMode }) => (themeMode === "light" ? "#000" : "#fff")};
 
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 2px ${({ themeMode }) => (themeMode === "light" ? "#2196f3" : "#90caf9")};
+    box-shadow: 0 0 0 2px
+      ${({ themeMode }) => (themeMode === "light" ? "#2196f3" : "#90caf9")};
   }
 `;
 
 const Button = styled.button<{ themeMode: "light" | "dark" }>`
   padding: 8px 12px;
-  background-color: ${({ themeMode }) => (themeMode === "light" ? "#2196f3" : "#90caf9")};
+  background-color: ${({ themeMode }) =>
+    themeMode === "light" ? "#2196f3" : "#90caf9"};
   color: ${({ themeMode }) => (themeMode === "light" ? "#fff" : "#000")};
   border: none;
   border-radius: 4px;
   cursor: pointer;
 
   &:hover {
-    background-color: ${({ themeMode }) => (themeMode === "light" ? "#1976d2" : "#64b5f6")};
+    background-color: ${({ themeMode }) =>
+      themeMode === "light" ? "#1976d2" : "#64b5f6"};
   }
 `;
 
