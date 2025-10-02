@@ -9,8 +9,19 @@ interface TodoItemProps {
 
 const TodoItem = ({ todo, onToggle, onDelete, onEdit }: TodoItemProps) => {
   return (
-    <li style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 0" }}>
-      <input type="checkbox" checked={todo.completed} onChange={() => onToggle(todo.id)} />
+    <li
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        padding: "6px 0",
+      }}
+    >
+      <input
+        type="checkbox"
+        checked={todo.completed}
+        onChange={() => onToggle(todo.id)}
+      />
       <span
         onDoubleClick={() => onEdit(todo.id)}
         style={{
@@ -21,8 +32,25 @@ const TodoItem = ({ todo, onToggle, onDelete, onEdit }: TodoItemProps) => {
       >
         {todo.text}
       </span>
-      <button onClick={() => onEdit(todo.id)}>✎</button>
-      <button onClick={() => onDelete(todo.id)} style={{ color: "red" }}>✕</button>
+      <button onClick={() => onEdit(todo.id)} style={{ color: "white",
+    backgroundColor: "#2196f3",
+    padding: "6px 12px",
+    borderRadius: "6px",
+    border: "none",
+    cursor: "pointer",}}>✎</button>
+      <button
+        onClick={() => onDelete(todo.id)}
+        style={{
+          color: "white",
+          backgroundColor: "#f44336",
+          padding: "6px 12px",
+          borderRadius: "6px",
+          border: "none",
+          cursor: "pointer",
+        }}
+      >
+        ✕
+      </button>
     </li>
   );
 };

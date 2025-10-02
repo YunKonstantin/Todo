@@ -20,7 +20,7 @@ const GlobalStyle = createGlobalStyle<{ themeMode: "light" | "dark" }>`
     color: ${({ themeMode }) => (themeMode === "light" ? "#111" : "#f1f1f1")};
     transition: background 0.4s ease, color 0.3s ease;
 
-    /* центрируем весь контент */
+    
     display: flex;
     justify-content: center;
     align-items: center;
@@ -37,7 +37,6 @@ const Container = styled.div`
   align-items: center;
 `;
 
-/* анимация появления */
 const fadeIn = keyframes`
   from {
     opacity: 0;
