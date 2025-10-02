@@ -58,14 +58,16 @@ Error generating stack: `+e.message+`
 `,Kv=Hl.input`
   flex: 1;
   padding: 8px;
-  border: 1px solid ${({themeMode:c})=>c==="light"?"#ccc":"#555"};
+  border: 1px solid
+    ${({themeMode:c})=>c==="light"?"#ccc":"#555"};
   border-radius: 4px;
   background-color: ${({themeMode:c})=>c==="light"?"#fff":"#333"};
   color: ${({themeMode:c})=>c==="light"?"#000":"#fff"};
 
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 2px ${({themeMode:c})=>c==="light"?"#2196f3":"#90caf9"};
+    box-shadow: 0 0 0 2px
+      ${({themeMode:c})=>c==="light"?"#2196f3":"#90caf9"};
   }
 `,wv=Hl.button`
   padding: 8px 12px;
@@ -117,7 +119,7 @@ Error generating stack: `+e.message+`
   backdrop-filter: blur(10px);
   border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
   transition: background 0.3s ease;
   width: 100%;
   animation: ${tm} 0.5s ease;
@@ -135,12 +137,12 @@ Error generating stack: `+e.message+`
   border: none;
   border-radius: 12px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
   }
 `,um=Hl.div`
   display: flex;
