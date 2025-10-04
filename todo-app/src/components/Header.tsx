@@ -5,7 +5,7 @@ export default function Header() {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentTime(prevTime => new Date());
+      setCurrentTime(() => new Date());
     }, 1000);
 
     return () => clearInterval(timer);
@@ -35,9 +35,9 @@ export default function Header() {
 
   return (
     <header style={headerStyle}>
-      <h3 style={titleStyle}>TODO-BASIC</h3>
+      <h3 style={titleStyle}>TODO by YunKonstantin</h3>
       <span style={timeStyle}>
-        Moscow-time: {currentTime.toLocaleTimeString()}
+        now : {currentTime.toLocaleTimeString()}
       </span>
     </header>
   );
