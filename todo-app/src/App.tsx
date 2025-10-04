@@ -1,6 +1,7 @@
 // src/App.tsx
 import { useEffect, useState } from "react";
 import { loadTasks, saveTasks, type Todo } from "./utils/localStorage";
+import Header from "./components/Header";
 import AddTodo from "./components/AddTodo";
 import TodoList from "./components/TodoList";
 import styled, {
@@ -111,7 +112,9 @@ const FilterSortRow = styled.div`
   }
 `;
 
+
 export default function App() {
+  
   const [todos, setTodos] = useState<Todo[]>([]);
   const [theme, setTheme] = useState<"light" | "dark">(
     (localStorage.getItem("theme") as "light" | "dark") || "light"
@@ -164,6 +167,7 @@ export default function App() {
   return (
     <ThemeProvider theme={{ mode: theme }}>
       <GlobalStyle themeMode={theme} />
+      <Header/>
       <Container>
         <Card themeMode={theme}>
           <ThemeButton themeMode={theme} onClick={toggleTheme}>
