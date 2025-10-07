@@ -20,21 +20,23 @@ const GlobalStyle = createGlobalStyle<{ themeMode: "light" | "dark" }>`
         : "linear-gradient(135deg, #1e1e2f, #121212)"};
     color: ${({ themeMode }) => (themeMode === "light" ? "#111" : "#f1f1f1")};
     transition: background 0.4s ease, color 0.3s ease;
-
-    
-    display: flex;
-    justify-content: center;
-    align-items: center;
     min-height: 100vh;
   }
 `;
 
-const Container = styled.div`
+const AppContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+`;
+
+const MainContainer = styled.div`
   max-width: 720px;
   width: 100%;
-  padding: 20px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
 `;
 
@@ -61,6 +63,7 @@ const Card = styled.div<{ themeMode: "light" | "dark" }>`
   transition: background 0.3s ease;
   width: 100%;
   animation: ${fadeIn} 0.5s ease;
+  margin-top: 20px;
 `;
 
 const Title = styled.h1`
@@ -112,17 +115,12 @@ const FilterSortRow = styled.div`
   }
 `;
 
-
 export default function App() {
-  
   const [todos, setTodos] = useState<Todo[]>([]);
   const [theme, setTheme] = useState<"light" | "dark">(
     (localStorage.getItem("theme") as "light" | "dark") || "light"
   );
-
-  const [filter, setFilter] = useState<"all" | "completed" | "incomplete">(
-    "all"
-  );
+  const [filter, setFilter] = useState<"all" | "completed" | "incomplete">("all");
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
   useEffect(() => {
@@ -167,49 +165,51 @@ export default function App() {
   return (
     <ThemeProvider theme={{ mode: theme }}>
       <GlobalStyle themeMode={theme} />
-      <Header/>
-      <Container>
-        <Card themeMode={theme}>
-          <ThemeButton themeMode={theme} onClick={toggleTheme}>
-            🌗 Переключить тему
-          </ThemeButton>
+      <AppContainer>
+        <Header />
+        <MainContainer>
+          <Card themeMode={theme}>
+            <ThemeButton themeMode={theme} onClick={toggleTheme}>
+              🌗 Переключить тему
+            </ThemeButton>
 
-          <Title>📝 Todo App</Title>
+            <Title>📝 Todo App</Title>
 
-          <FilterSortRow>
-            <div>
-              <label>Фильтр: </label>
-              <select
-                value={filter}
-                onChange={(e) => setFilter(e.target.value as any)}
-              >
-                <option value="all">Все</option>
-                <option value="completed">Готовые</option>
-                <option value="incomplete">Неготовые</option>
-              </select>
-            </div>
+            <FilterSortRow>
+              <div>
+                <label>Фильтр: </label>
+                <select
+                  value={filter}
+                  onChange={(e) => setFilter(e.target.value as any)}
+                >
+                  <option value="all">Все</option>
+                  <option value="completed">Готовые</option>
+                  <option value="incomplete">Неготовые</option>
+                </select>
+              </div>
 
-            <div>
-              <label>Сортировка: </label>
-              <select
-                value={sortOrder}
-                onChange={(e) => setSortOrder(e.target.value as any)}
-              >
-                <option value="newest">Новые сначала</option>
-                <option value="oldest">Старые сначала</option>
-              </select>
-            </div>
-          </FilterSortRow>
+              <div>
+                <label>Сортировка: </label>
+                <select
+                  value={sortOrder}
+                  onChange={(e) => setSortOrder(e.target.value as any)}
+                >
+                  <option value="newest">Новые сначала</option>
+                  <option value="oldest">Старые сначала</option>
+                </select>
+              </div>
+            </FilterSortRow>
 
-          <AddTodo onAdd={addTodo} theme={theme} />
-          <TodoList
-            todos={displayedTodos}
-            onToggle={toggleTodo}
-            onDelete={deleteTodo}
-            onEditSave={editTodo}
-          />
-        </Card>
-      </Container>
+            <AddTodo onAdd={addTodo} theme={theme} />
+            <TodoList
+              todos={displayedTodos}
+              onToggle={toggleTodo}
+              onDelete={deleteTodo}
+              onEditSave={editTodo}
+            />
+          </Card>
+        </MainContainer>
+      </AppContainer>
     </ThemeProvider>
   );
 }
