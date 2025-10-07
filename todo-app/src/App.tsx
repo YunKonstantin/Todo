@@ -120,7 +120,9 @@ export default function App() {
   const [theme, setTheme] = useState<"light" | "dark">(
     (localStorage.getItem("theme") as "light" | "dark") || "light"
   );
-  const [filter, setFilter] = useState<"all" | "completed" | "incomplete">("all");
+  const [filter, setFilter] = useState<"all" | "completed" | "incomplete">(
+    "all"
+  );
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
   useEffect(() => {
@@ -135,23 +137,34 @@ export default function App() {
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  const toggleTheme = useCallback(() =>
-    setTheme((prev) => (prev === "light" ? "dark" : "light")), [])
+  const toggleTheme = useCallback(
+    () => setTheme((prev) => (prev === "light" ? "dark" : "light")),
+    []
+  );
 
-  const addTodo = useCallback((text: string) =>
-    setTodos((prev) => [...prev, { id: Date.now(), text, completed: false }]),[]
-)
-  const toggleTodo = useCallback((id: number) =>
-    setTodos((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t))
-    ),[])
+  const addTodo = useCallback(
+    (text: string) =>
+      setTodos((prev) => [...prev, { id: Date.now(), text, completed: false }]),
+    []
+  );
+  const toggleTodo = useCallback(
+    (id: number) =>
+      setTodos((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t))
+      ),
+    []
+  );
 
-  const deleteTodo = useCallback((id: number) =>
-    setTodos((prev) => prev.filter((t) => t.id !== id)),[])
+  const deleteTodo = useCallback(
+    (id: number) => setTodos((prev) => prev.filter((t) => t.id !== id)),
+    []
+  );
 
-  const editTodo = useCallback((id: number, text: string) =>
-    setTodos((prev) => prev.map((t) => (t.id === id ? { ...t, text } : t))),[]
-)
+  const editTodo = useCallback(
+    (id: number, text: string) =>
+      setTodos((prev) => prev.map((t) => (t.id === id ? { ...t, text } : t))),
+    []
+  );
   let displayedTodos = todos;
   if (filter === "completed")
     displayedTodos = displayedTodos.filter((t) => t.completed);

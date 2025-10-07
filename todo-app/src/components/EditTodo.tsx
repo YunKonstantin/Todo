@@ -32,7 +32,6 @@ const EditTodo = ({ initialText, onSave, onCancel }: EditTodoProps) => {
         onChange={(e) => {
           setValue(e.target.value);
           setError("");
-          
         }}
         style={{
           flex: 1,
@@ -42,7 +41,6 @@ const EditTodo = ({ initialText, onSave, onCancel }: EditTodoProps) => {
         }}
         onKeyDown={(e) => e.key === "Enter" && handleSave()}
         placeholder="Введите задачу..."
-        
       />
 
       {error && <span style={{ color: "red", fontSize: 12 }}>{error}</span>}

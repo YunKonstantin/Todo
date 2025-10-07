@@ -32,12 +32,19 @@ const TodoItem = ({ todo, onToggle, onDelete, onEdit }: TodoItemProps) => {
       >
         {todo.text}
       </span>
-      <button onClick={() => onEdit(todo.id)} style={{ color: "white",
-    backgroundColor: "#2196f3",
-    padding: "6px 12px",
-    borderRadius: "6px",
-    border: "none",
-    cursor: "pointer",}}>✎</button>
+      <button
+        onClick={() => onEdit(todo.id)}
+        style={{
+          color: "white",
+          backgroundColor: "#2196f3",
+          padding: "6px 12px",
+          borderRadius: "6px",
+          border: "none",
+          cursor: "pointer",
+        }}
+      >
+        ✎
+      </button>
       <button
         onClick={() => onDelete(todo.id)}
         style={{
