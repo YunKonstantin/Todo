@@ -1,5 +1,5 @@
 // src/App.tsx
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { loadTasks, saveTasks, type Todo } from "./utils/localStorage";
 import Header from "./components/Header";
 import AddTodo from "./components/AddTodo";
@@ -135,23 +135,23 @@ export default function App() {
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  const toggleTheme = () =>
-    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  const toggleTheme = useCallback(() =>
+    setTheme((prev) => (prev === "light" ? "dark" : "light")), [])
 
-  const addTodo = (text: string) =>
-    setTodos((prev) => [...prev, { id: Date.now(), text, completed: false }]);
-
-  const toggleTodo = (id: number) =>
+  const addTodo = useCallback((text: string) =>
+    setTodos((prev) => [...prev, { id: Date.now(), text, completed: false }]),[]
+)
+  const toggleTodo = useCallback((id: number) =>
     setTodos((prev) =>
       prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t))
-    );
+    ),[])
 
-  const deleteTodo = (id: number) =>
-    setTodos((prev) => prev.filter((t) => t.id !== id));
+  const deleteTodo = useCallback((id: number) =>
+    setTodos((prev) => prev.filter((t) => t.id !== id)),[])
 
-  const editTodo = (id: number, text: string) =>
-    setTodos((prev) => prev.map((t) => (t.id === id ? { ...t, text } : t)));
-
+  const editTodo = useCallback((id: number, text: string) =>
+    setTodos((prev) => prev.map((t) => (t.id === id ? { ...t, text } : t))),[]
+)
   let displayedTodos = todos;
   if (filter === "completed")
     displayedTodos = displayedTodos.filter((t) => t.completed);
