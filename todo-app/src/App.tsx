@@ -1,7 +1,7 @@
 // src/App.tsx
 import { useCallback, useEffect, useState } from "react";
 import { loadTasks, saveTasks, type Todo } from "./utils/localStorage";
-import Header from "./components/Header";
+
 import AddTodo from "./components/AddTodo";
 import TodoList from "./components/TodoList";
 import styled, {
@@ -179,7 +179,6 @@ export default function App() {
     <ThemeProvider theme={{ mode: theme }}>
       <GlobalStyle themeMode={theme} />
       <AppContainer>
-        <Header />
         <MainContainer>
           <Card themeMode={theme}>
             <ThemeButton themeMode={theme} onClick={toggleTheme}>
