@@ -1,4 +1,10 @@
-import type { Todo } from "../utils/localStorage";
+import styled from "styled-components";
+
+interface Todo {
+  id: number;
+  text: string;
+  completed: boolean;
+}
 
 interface TodoItemProps {
   todo: Todo;
@@ -7,58 +13,83 @@ interface TodoItemProps {
   onEdit: (id: number) => void;
 }
 
+const Container = styled.li`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+`;
+
+const Checkbox = styled.input`
+  cursor: pointer;
+`;
+
+const Text = styled.span<{ $completed: boolean }>`
+  flex: 1;
+  cursor: pointer;
+  text-decoration: ${({ $completed }) => $completed ? "line-through" : "none"};
+  color: ${({ $completed }) => $completed ? "#888" : "inherit"};
+`;
+
+const EditButton = styled.button`
+  color: white;
+  background-color: #2196f3;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #1976d2;
+  }
+`;
+
+const DeleteButton = styled.button`
+  color: white;
+  background-color: #f44336;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #d32f2f;
+  }
+`;
+
 const TodoItem = ({ todo, onToggle, onDelete, onEdit }: TodoItemProps) => {
+  const handleToggle = () => {
+    onToggle(todo.id);
+  };
+
+  const handleEdit = () => {
+    onEdit(todo.id);
+  };
+
+  const handleDelete = () => {
+    onDelete(todo.id);
+  };
+
   return (
-    <li
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        padding: "6px 0",
-      }}
-    >
-      <input
+    <Container>
+      <Checkbox
         type="checkbox"
         checked={todo.completed}
-        onChange={() => onToggle(todo.id)}
+        onChange={handleToggle}
       />
-      <span
-        onDoubleClick={() => onEdit(todo.id)}
-        style={{
-          flex: 1,
-          cursor: "pointer",
-          textDecoration: todo.completed ? "line-through" : "none",
-        }}
+      <Text 
+        $completed={todo.completed}
+        onDoubleClick={handleEdit}
       >
         {todo.text}
-      </span>
-      <button
-        onClick={() => onEdit(todo.id)}
-        style={{
-          color: "white",
-          backgroundColor: "#2196f3",
-          padding: "6px 12px",
-          borderRadius: "6px",
-          border: "none",
-          cursor: "pointer",
-        }}
-      >
+      </Text>
+      <EditButton onClick={handleEdit}>
         ✎
-      </button>
-      <button
-        onClick={() => onDelete(todo.id)}
-        style={{
-          color: "white",
-          backgroundColor: "#f44336",
-          padding: "6px 12px",
-          borderRadius: "6px",
-          border: "none",
-          cursor: "pointer",
-        }}
-      >
+      </EditButton>
+      <DeleteButton onClick={handleDelete}>
         ✕
-      </button>
-    </li>
+      </DeleteButton>
+    </Container>
   );
 };
 

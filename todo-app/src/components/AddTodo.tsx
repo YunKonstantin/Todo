@@ -18,35 +18,35 @@ const InputRow = styled.div`
   gap: 8px;
 `;
 
-const Input = styled.input<{ themeMode: "light" | "dark" }>`
+const Input = styled.input<{ $themeMode: "light" | "dark" }>`
   flex: 1;
   padding: 8px;
   border: 1px solid
-    ${({ themeMode }) => (themeMode === "light" ? "#ccc" : "#555")};
+    ${({ $themeMode }) => ($themeMode === "light" ? "#ccc" : "#555")};
   border-radius: 4px;
-  background-color: ${({ themeMode }) =>
-    themeMode === "light" ? "#fff" : "#333"};
-  color: ${({ themeMode }) => (themeMode === "light" ? "#000" : "#fff")};
+  background-color: ${({ $themeMode }) =>
+    $themeMode === "light" ? "#fff" : "#333"};
+  color: ${({ $themeMode }) => ($themeMode === "light" ? "#000" : "#fff")};
 
   &:focus {
     outline: none;
     box-shadow: 0 0 0 2px
-      ${({ themeMode }) => (themeMode === "light" ? "#2196f3" : "#90caf9")};
+      ${({ $themeMode }) => ($themeMode === "light" ? "#2196f3" : "#90caf9")};
   }
 `;
 
-const Button = styled.button<{ themeMode: "light" | "dark" }>`
+const Button = styled.button<{ $themeMode: "light" | "dark" }>`
   padding: 8px 12px;
-  background-color: ${({ themeMode }) =>
-    themeMode === "light" ? "#2196f3" : "#90caf9"};
-  color: ${({ themeMode }) => (themeMode === "light" ? "#fff" : "#000")};
+  background-color: ${({ $themeMode }) =>
+    $themeMode === "light" ? "#2196f3" : "#90caf9"};
+  color: ${({ $themeMode }) => ($themeMode === "light" ? "#fff" : "#000")};
   border: none;
   border-radius: 4px;
   cursor: pointer;
 
   &:hover {
-    background-color: ${({ themeMode }) =>
-      themeMode === "light" ? "#1976d2" : "#64b5f6"};
+    background-color: ${({ $themeMode }) =>
+      $themeMode === "light" ? "#1976d2" : "#64b5f6"};
   }
 `;
 
@@ -70,20 +70,28 @@ const AddTodo = ({ onAdd, theme = "light" }: AddTodoProps) => {
     setError("");
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleAdd();
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setText(e.target.value);
+    if (error) setError("");
+  };
+
   return (
     <Container>
       <InputRow>
         <Input
-          themeMode={theme}
+          $themeMode={theme}
           value={text}
-          onChange={(e) => {
-            setText(e.target.value);
-            if (error) setError("");
-          }}
-          onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
           placeholder="Новая задача..."
         />
-        <Button themeMode={theme} onClick={handleAdd}>
+        <Button $themeMode={theme} onClick={handleAdd}>
           Добавить
         </Button>
       </InputRow>

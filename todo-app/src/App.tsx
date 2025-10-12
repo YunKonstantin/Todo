@@ -1,24 +1,36 @@
-// src/App.tsx
-import { useCallback, useEffect, useState } from "react";
-import { loadTasks, saveTasks, type Todo } from "./utils/localStorage";
+import { useEffect, useState } from "react";
+import { Provider } from "react-redux";
+import { store } from "./store";
+import { useAppDispatch, useAppSelector } from "./hooks/redux";
+import {
+  fetchTodos,
+  setFilter,
+  setSortOrder,
+  setPage,
+  addTodo,
+  toggleTodo,
+  deleteTodo,
+  updateTodo,
+} from "./store/slices/todoSlices";
 
 import AddTodo from "./components/AddTodo";
 import TodoList from "./components/TodoList";
+import Pagination from "./components/Pagination";
 import styled, {
   ThemeProvider,
   createGlobalStyle,
   keyframes,
 } from "styled-components";
 
-const GlobalStyle = createGlobalStyle<{ themeMode: "light" | "dark" }>`
+const GlobalStyle = createGlobalStyle<{ $themeMode: "light" | "dark" }>`
   body {
     margin: 0;
     font-family: "Inter", system-ui, sans-serif;
-    background: ${({ themeMode }) =>
-      themeMode === "light"
+    background: ${({ $themeMode }) =>
+      $themeMode === "light"
         ? "linear-gradient(135deg, #e0f7fa, #ffffff)"
         : "linear-gradient(135deg, #1e1e2f, #121212)"};
-    color: ${({ themeMode }) => (themeMode === "light" ? "#111" : "#f1f1f1")};
+    color: ${({ $themeMode }) => ($themeMode === "light" ? "#111" : "#f1f1f1")};
     transition: background 0.4s ease, color 0.3s ease;
     min-height: 100vh;
   }
@@ -51,9 +63,9 @@ const fadeIn = keyframes`
   }
 `;
 
-const Card = styled.div<{ themeMode: "light" | "dark" }>`
-  background: ${({ themeMode }) =>
-    themeMode === "light"
+const Card = styled.div<{ $themeMode: "light" | "dark" }>`
+  background: ${({ $themeMode }) =>
+    $themeMode === "light"
       ? "rgba(255, 255, 255, 0.7)"
       : "rgba(40, 40, 40, 0.7)"};
   backdrop-filter: blur(10px);
@@ -73,11 +85,11 @@ const Title = styled.h1`
   font-weight: 700;
 `;
 
-const ThemeButton = styled.button<{ themeMode: "light" | "dark" }>`
+const ThemeButton = styled.button<{ $themeMode: "light" | "dark" }>`
   margin-bottom: 16px;
   padding: 10px 18px;
-  background: ${({ themeMode }) =>
-    themeMode === "light"
+  background: ${({ $themeMode }) =>
+    $themeMode === "light"
       ? "linear-gradient(135deg, #2196f3, #64b5f6)"
       : "linear-gradient(135deg, #90caf9, #42a5f5)"};
   color: #fff;
@@ -115,96 +127,136 @@ const FilterSortRow = styled.div`
   }
 `;
 
-export default function App() {
-  const [todos, setTodos] = useState<Todo[]>([]);
+// Основной компонент приложения
+function AppContent() {
+  const dispatch = useAppDispatch();
+  const {
+    items: todos,
+    loading,
+    error,
+    pagination,
+    filters,
+  } = useAppSelector((state) => state.todos);
+
   const [theme, setTheme] = useState<"light" | "dark">(
     (localStorage.getItem("theme") as "light" | "dark") || "light"
   );
-  const [filter, setFilter] = useState<"all" | "completed" | "incomplete">(
-    "all"
-  );
-  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
+  // Загружаем задачи при загрузке приложения и при изменении фильтров/пагинации
   useEffect(() => {
-    setTodos(loadTasks());
-  }, []);
+    dispatch(fetchTodos());
+  }, [
+    dispatch,
+    pagination.currentPage,
+    pagination.itemsPerPage,
+    filters.status,
+  ]);
 
-  useEffect(() => {
-    saveTasks(todos);
-  }, [todos]);
+  const toggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+  };
 
-  useEffect(() => {
-    localStorage.setItem("theme", theme);
-  }, [theme]);
+  const handleAddTodo = async (text: string) => {
+    try {
+      await dispatch(addTodo(text)).unwrap();
+      // После добавления перезагружаем данные
+      dispatch(fetchTodos());
+    } catch (error) {
+      console.error("Ошибка при добавлении задачи:", error);
+    }
+  };
 
-  const toggleTheme = useCallback(
-    () => setTheme((prev) => (prev === "light" ? "dark" : "light")),
-    []
-  );
+  const handleToggleTodo = async (id: number, completed: boolean) => {
+    try {
+      await dispatch(toggleTodo({ id, completed })).unwrap();
+    } catch (error) {
+      console.error("Ошибка при переключении задачи:", error);
+    }
+  };
 
-  const addTodo = useCallback(
-    (text: string) =>
-      setTodos((prev) => [...prev, { id: Date.now(), text, completed: false }]),
-    []
-  );
-  const toggleTodo = useCallback(
-    (id: number) =>
-      setTodos((prev) =>
-        prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t))
-      ),
-    []
-  );
+  const handleDeleteTodo = async (id: number) => {
+    try {
+      await dispatch(deleteTodo(id)).unwrap();
+      // После удаления перезагружаем данные
+      dispatch(fetchTodos());
+    } catch (error) {
+      console.error("Ошибка при удалении задачи:", error);
+    }
+  };
 
-  const deleteTodo = useCallback(
-    (id: number) => setTodos((prev) => prev.filter((t) => t.id !== id)),
-    []
-  );
+  const handleEditTodo = async (id: number, text: string) => {
+    try {
+      await dispatch(updateTodo({ id, text })).unwrap();
+    } catch (error) {
+      console.error("Ошибка при редактировании задачи:", error);
+    }
+  };
 
-  const editTodo = useCallback(
-    (id: number, text: string) =>
-      setTodos((prev) => prev.map((t) => (t.id === id ? { ...t, text } : t))),
-    []
-  );
-  let displayedTodos = todos;
-  if (filter === "completed")
+  const handlePageChange = (page: number) => {
+    dispatch(setPage(page));
+  };
+
+  // Защита от неитерируемого todos
+  const safeTodos = Array.isArray(todos) ? todos : [];
+
+  // Фильтрация и сортировка
+  let displayedTodos = safeTodos;
+  if (filters.status === "completed") {
     displayedTodos = displayedTodos.filter((t) => t.completed);
-  if (filter === "incomplete")
+  } else if (filters.status === "active") {
     displayedTodos = displayedTodos.filter((t) => !t.completed);
+  }
 
-  displayedTodos = displayedTodos.sort((a, b) =>
-    sortOrder === "newest" ? b.id - a.id : a.id - b.id
+  displayedTodos = [...displayedTodos].sort((a, b) =>
+    filters.sortOrder === "newest" ? b.id - a.id : a.id - b.id
   );
 
   return (
     <ThemeProvider theme={{ mode: theme }}>
-      <GlobalStyle themeMode={theme} />
+      <GlobalStyle $themeMode={theme} />
       <AppContainer>
         <MainContainer>
-          <Card themeMode={theme}>
-            <ThemeButton themeMode={theme} onClick={toggleTheme}>
+          <Card $themeMode={theme}>
+            <ThemeButton $themeMode={theme} onClick={toggleTheme}>
               🌗 Переключить тему
             </ThemeButton>
 
             <Title>📝 Todo App</Title>
 
+            {error && (
+              <div
+                style={{
+                  color: "red",
+                  marginBottom: "16px",
+                  textAlign: "center",
+                }}
+              >
+                Ошибка: {error}
+              </div>
+            )}
+
             <FilterSortRow>
               <div>
                 <label>Фильтр: </label>
                 <select
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value as any)}
+                  value={filters.status}
+                  onChange={(e) => dispatch(setFilter(e.target.value as any))}
                 >
                   <option value="all">Все</option>
+                  <option value="active">Активные</option>
                   <option value="completed">Готовые</option>
-                  <option value="incomplete">Неготовые</option>
                 </select>
               </div>
 
               <div>
                 <label>Сортировка: </label>
                 <select
-                  value={sortOrder}
-                  onChange={(e) => setSortOrder(e.target.value as any)}
+                  value={filters.sortOrder}
+                  onChange={(e) =>
+                    dispatch(setSortOrder(e.target.value as any))
+                  }
                 >
                   <option value="newest">Новые сначала</option>
                   <option value="oldest">Старые сначала</option>
@@ -212,16 +264,41 @@ export default function App() {
               </div>
             </FilterSortRow>
 
-            <AddTodo onAdd={addTodo} theme={theme} />
-            <TodoList
-              todos={displayedTodos}
-              onToggle={toggleTodo}
-              onDelete={deleteTodo}
-              onEditSave={editTodo}
-            />
+            <AddTodo onAdd={handleAddTodo} theme={theme} />
+
+            {loading ? (
+              <div style={{ textAlign: "center", padding: "20px" }}>
+                Загрузка...
+              </div>
+            ) : (
+              <>
+                <TodoList
+                  todos={displayedTodos}
+                  onToggle={handleToggleTodo}
+                  onDelete={handleDeleteTodo}
+                  onEditSave={handleEditTodo}
+                />
+
+                <Pagination
+                  currentPage={pagination.currentPage}
+                  totalPages={pagination.totalPages}
+                  onPageChange={handlePageChange}
+                  theme={theme}
+                />
+              </>
+            )}
           </Card>
         </MainContainer>
       </AppContainer>
     </ThemeProvider>
+  );
+}
+
+// Главный компонент с Provider
+export default function App() {
+  return (
+    <Provider store={store}>
+      <AppContent />
+    </Provider>
   );
 }

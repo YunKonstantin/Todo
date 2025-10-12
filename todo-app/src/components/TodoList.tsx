@@ -1,45 +1,70 @@
 import { useState } from "react";
-import type { Todo } from "../utils/localStorage";
+import styled from "styled-components";
+import type { Todo } from "../types/types";
 import TodoItem from "./TodoItem";
 import EditTodo from "./EditTodo";
 
 interface TodoListProps {
   todos: Todo[];
-  onToggle: (id: number) => void;
+onToggle: (id: number, completed: boolean) => void;
   onDelete: (id: number) => void;
   onEditSave: (id: number, text: string) => void;
 }
 
+const Container = styled.ul`
+  padding: 0;
+  list-style: none;
+  margin: 0;
+`;
+
+const EmptyMessage = styled.p`
+  text-align: center;
+  color: #888;
+  margin: 20px 0;
+`;
+
 const TodoList = ({ todos, onToggle, onDelete, onEditSave }: TodoListProps) => {
   const [editId, setEditId] = useState<number | null>(null);
 
-  if (todos.length === 0) return <p>Нет задач</p>;
+  const handleEdit = (id: number) => {
+    setEditId(id);
+  };
+
+  const handleSave = (id: number, text: string) => {
+    onEditSave(id, text);
+    setEditId(null);
+  };
+
+  const handleCancel = () => {
+    setEditId(null);
+  };
+
+  if (todos.length === 0) {
+    return <EmptyMessage>Нет задач</EmptyMessage>;
+  }
 
   return (
-    <ul style={{ padding: 0, listStyle: "none" }}>
-      {todos.map((t) =>
-        editId === t.id ? (
-          <li key={t.id}>
+    <Container>
+      {todos.map((todo) =>
+        editId === todo.id ? (
+          <li key={todo.id}>
             <EditTodo
-              initialText={t.text}
-              onSave={(text) => {
-                onEditSave(t.id, text);
-                setEditId(null);
-              }}
-              onCancel={() => setEditId(null)}
+              initialText={todo.text}
+              onSave={(text) => handleSave(todo.id, text)}
+              onCancel={handleCancel}
             />
           </li>
         ) : (
           <TodoItem
-            key={t.id}
-            todo={t}
-            onToggle={onToggle}
+            key={todo.id}
+            todo={todo}
+          onToggle={(id) => onToggle(id, !todo.completed)}
             onDelete={onDelete}
-            onEdit={() => setEditId(t.id)}
+            onEdit={handleEdit}
           />
         )
       )}
-    </ul>
+    </Container>
   );
 };
 

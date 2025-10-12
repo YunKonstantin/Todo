@@ -1,10 +1,68 @@
 import { useState } from "react";
+import styled from "styled-components";
 
 interface EditTodoProps {
   initialText: string;
   onSave: (text: string) => void;
   onCancel: () => void;
 }
+
+const Container = styled.div`
+  display: flex;
+  gap: 8px;
+  flex-direction: column;
+  width: 100%;
+`;
+
+const Input = styled.input`
+  flex: 1;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  
+  &:focus {
+    outline: none;
+    border-color: #2196f3;
+  }
+`;
+
+const ErrorText = styled.span`
+  color: red;
+  font-size: 12px;
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  gap: 8px;
+`;
+
+const SaveButton = styled.button`
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  background-color: #2196f3;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #1976d2;
+  }
+`;
+
+const CancelButton = styled.button`
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  background-color: #f44336;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+
+  &:hover {
+    background-color: #d32f2f;
+  }
+`;
 
 const EditTodo = ({ initialText, onSave, onCancel }: EditTodoProps) => {
   const [value, setValue] = useState(initialText);
@@ -18,65 +76,41 @@ const EditTodo = ({ initialText, onSave, onCancel }: EditTodoProps) => {
     onSave(value.trim());
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSave();
+    } else if (e.key === "Escape") {
+      onCancel();
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(e.target.value);
+    setError("");
+  };
+
   return (
-    <div
-      style={{
-        display: "flex",
-        gap: 8,
-        flexDirection: "column",
-        width: "100%",
-      }}
-    >
-      <input
+    <Container>
+      <Input
         value={value}
-        onChange={(e) => {
-          setValue(e.target.value);
-          setError("");
-        }}
-        style={{
-          flex: 1,
-          padding: "6px 10px",
-          borderRadius: 6,
-          border: "1px solid #ccc",
-        }}
-        onKeyDown={(e) => e.key === "Enter" && handleSave()}
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
         placeholder="Введите задачу..."
+        autoFocus
       />
 
-      {error && <span style={{ color: "red", fontSize: 12 }}>{error}</span>}
+      {error && <ErrorText>{error}</ErrorText>}
 
-      <div style={{ display: "flex", gap: 8 }}>
-        <button
-          onClick={handleSave}
-          style={{
-            padding: "6px 12px",
-            borderRadius: 6,
-            border: "none",
-            backgroundColor: "#2196f3",
-            color: "#fff",
-            fontWeight: 600,
-            cursor: "pointer",
-          }}
-        >
+      <ButtonContainer>
+        <SaveButton onClick={handleSave}>
           Сохранить
-        </button>
+        </SaveButton>
 
-        <button
-          onClick={onCancel}
-          style={{
-            padding: "6px 12px",
-            borderRadius: 6,
-            border: "none",
-            backgroundColor: "#f44336",
-            color: "#fff",
-            cursor: "pointer",
-            fontWeight: 600,
-          }}
-        >
+        <CancelButton onClick={onCancel}>
           Отменить
-        </button>
-      </div>
-    </div>
+        </CancelButton>
+      </ButtonContainer>
+    </Container>
   );
 };
 
