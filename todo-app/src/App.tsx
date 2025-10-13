@@ -7,10 +7,12 @@ import {
   setFilter,
   setSortOrder,
   setPage,
+  setItemsPerPage,
   addTodo,
   toggleTodo,
   deleteTodo,
   updateTodo,
+  clearError, // Добавьте этот импорт
 } from "./store/slices/todoSlices";
 
 import AddTodo from "./components/AddTodo";
@@ -127,6 +129,84 @@ const FilterSortRow = styled.div`
   }
 `;
 
+const ErrorAlert = styled.div<{ $themeMode: "light" | "dark" }>`
+  background-color: ${({ $themeMode }) => 
+    $themeMode === "light" ? "#ffebee" : "#d32f2f"};
+  color: ${({ $themeMode }) => 
+    $themeMode === "light" ? "#c62828" : "#fff"};
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border: 1px solid ${({ $themeMode }) => 
+    $themeMode === "light" ? "#ffcdd2" : "#b71c1c"};
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+`;
+
+const CloseButton = styled.button`
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
+const LoadingOverlay = styled.div<{ $visible: boolean }>`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: ${({ $visible }) => ($visible ? "flex" : "none")};
+  justify-content: center;
+  align-items: center;
+  border-radius: 16px;
+  z-index: 10;
+`;
+
+const LoadingSpinner = styled.div`
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #2196f3;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+
+const EmptyState = styled.div`
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+  
+  h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.2rem;
+  }
+  
+  p {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+`;
+
 // Основной компонент приложения
 function AppContent() {
   const dispatch = useAppDispatch();
@@ -141,6 +221,7 @@ function AppContent() {
   const [theme, setTheme] = useState<"light" | "dark">(
     (localStorage.getItem("theme") as "light" | "dark") || "light"
   );
+  const [localLoading, setLocalLoading] = useState(false);
 
   // Загружаем задачи при загрузке приложения и при изменении фильтров/пагинации
   useEffect(() => {
@@ -154,19 +235,20 @@ function AppContent() {
   };
 
   const handleAddTodo = async (text: string) => {
+    setLocalLoading(true);
     try {
       await dispatch(addTodo(text)).unwrap();
-      // После добавления перезагружаем данные
       dispatch(fetchTodos());
     } catch (error) {
       console.error("Ошибка при добавлении задачи:", error);
+    } finally {
+      setLocalLoading(false);
     }
   };
 
   const handleToggleTodo = async (id: number, completed: boolean) => {
     try {
       await dispatch(toggleTodo({ id, completed })).unwrap();
-      // После переключения перезагружаем данные
       dispatch(fetchTodos());
     } catch (error) {
       console.error("Ошибка при переключении задачи:", error);
@@ -176,7 +258,6 @@ function AppContent() {
   const handleDeleteTodo = async (id: number) => {
     try {
       await dispatch(deleteTodo(id)).unwrap();
-      // После удаления перезагружаем данные
       dispatch(fetchTodos());
     } catch (error) {
       console.error("Ошибка при удалении задачи:", error);
@@ -186,7 +267,6 @@ function AppContent() {
   const handleEditTodo = async (id: number, text: string) => {
     try {
       await dispatch(updateTodo({ id, text })).unwrap();
-      // После редактирования перезагружаем данные
       dispatch(fetchTodos());
     } catch (error) {
       console.error("Ошибка при редактировании задачи:", error);
@@ -195,6 +275,14 @@ function AppContent() {
 
   const handlePageChange = (page: number) => {
     dispatch(setPage(page));
+  };
+
+  const handleItemsPerPageChange = (itemsPerPage: number) => {
+    dispatch(setItemsPerPage(itemsPerPage));
+  };
+
+  const handleClearError = () => {
+    dispatch(clearError());
   };
 
   // Защита от неитерируемого todos
@@ -217,23 +305,24 @@ function AppContent() {
       <GlobalStyle $themeMode={theme} />
       <AppContainer>
         <MainContainer>
-          <Card $themeMode={theme}>
+          <Card $themeMode={theme} style={{ position: 'relative' }}>
+            {/* Loading Overlay */}
+            <LoadingOverlay $visible={loading}>
+              <LoadingSpinner />
+            </LoadingOverlay>
+
             <ThemeButton $themeMode={theme} onClick={toggleTheme}>
               🌗 Переключить тему
             </ThemeButton>
 
             <Title>📝 Todo App</Title>
 
+            {/* Error Alert */}
             {error && (
-              <div
-                style={{
-                  color: "red",
-                  marginBottom: "16px",
-                  textAlign: "center",
-                }}
-              >
-                Ошибка: {error}
-              </div>
+              <ErrorAlert $themeMode={theme}>
+                <span>❌ {error}</span>
+                <CloseButton onClick={handleClearError}>×</CloseButton>
+              </ErrorAlert>
             )}
 
             <FilterSortRow>
@@ -242,6 +331,7 @@ function AppContent() {
                 <select
                   value={filters.status}
                   onChange={(e) => dispatch(setFilter(e.target.value as any))}
+                  disabled={loading}
                 >
                   <option value="all">Все</option>
                   <option value="active">Активные</option>
@@ -253,22 +343,47 @@ function AppContent() {
                 <label>Сортировка: </label>
                 <select
                   value={filters.sortOrder}
-                  onChange={(e) =>
-                    dispatch(setSortOrder(e.target.value as any))
-                  }
+                  onChange={(e) => dispatch(setSortOrder(e.target.value as any))}
+                  disabled={loading}
                 >
                   <option value="newest">Новые сначала</option>
                   <option value="oldest">Старые сначала</option>
                 </select>
               </div>
+
+              <div>
+                <label>На странице: </label>
+                <select
+                  value={pagination.itemsPerPage}
+                  onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                  disabled={loading}
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                </select>
+              </div>
             </FilterSortRow>
 
-            <AddTodo onAdd={handleAddTodo} theme={theme} />
+            <AddTodo onAdd={handleAddTodo} theme={theme} disabled={localLoading} />
 
             {loading ? (
-              <div style={{ textAlign: "center", padding: "20px" }}>
-                Загрузка...
+              <div style={{ textAlign: "center", padding: "40px" }}>
+                <LoadingSpinner />
+                <div style={{ marginTop: '16px' }}>Загрузка задач...</div>
               </div>
+            ) : displayedTodos.length === 0 ? (
+              <EmptyState>
+                <h3>📭 Нет задач</h3>
+                <p>
+                  {filters.status === "completed" 
+                    ? "У вас нет выполненных задач" 
+                    : filters.status === "active" 
+                    ? "Все задачи выполнены!" 
+                    : "Добавьте первую задачу"}
+                </p>
+              </EmptyState>
             ) : (
               <>
                 <TodoList
