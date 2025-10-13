@@ -145,12 +145,7 @@ function AppContent() {
   // Загружаем задачи при загрузке приложения и при изменении фильтров/пагинации
   useEffect(() => {
     dispatch(fetchTodos());
-  }, [
-    dispatch,
-    pagination.currentPage,
-    pagination.itemsPerPage,
-    filters.status,
-  ]);
+  }, [dispatch, pagination.currentPage, pagination.itemsPerPage, filters.status]);
 
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
@@ -171,6 +166,8 @@ function AppContent() {
   const handleToggleTodo = async (id: number, completed: boolean) => {
     try {
       await dispatch(toggleTodo({ id, completed })).unwrap();
+      // После переключения перезагружаем данные
+      dispatch(fetchTodos());
     } catch (error) {
       console.error("Ошибка при переключении задачи:", error);
     }
@@ -189,6 +186,8 @@ function AppContent() {
   const handleEditTodo = async (id: number, text: string) => {
     try {
       await dispatch(updateTodo({ id, text })).unwrap();
+      // После редактирования перезагружаем данные
+      dispatch(fetchTodos());
     } catch (error) {
       console.error("Ошибка при редактировании задачи:", error);
     }

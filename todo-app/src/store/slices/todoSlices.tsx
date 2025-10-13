@@ -23,7 +23,7 @@ interface TodoState {
 }
 
 const initialState: TodoState = {
-  items: [], // гарантируем, что это массив
+  items: [],
   loading: false,
   error: null,
   pagination: {
@@ -113,7 +113,6 @@ const todosSlice = createSlice({
       })
       .addCase(fetchTodos.fulfilled, (state, action) => {
         state.loading = false;
-        // Гарантируем, что items всегда массив
         state.items = Array.isArray(action.payload.data) ? action.payload.data : [];
         state.pagination = {
           currentPage: action.payload.page,
@@ -130,13 +129,8 @@ const todosSlice = createSlice({
       .addCase(addTodo.pending, (state) => {
         state.loading = true;
       })
-      .addCase(addTodo.fulfilled, (state, action) => {
+      .addCase(addTodo.fulfilled, (state) => {
         state.loading = false;
-        // Гарантируем, что items всегда массив перед использованием unshift
-        if (!Array.isArray(state.items)) {
-          state.items = [];
-        }
-        state.items.unshift(action.payload);
         state.pagination.totalItems += 1;
       })
       .addCase(addTodo.rejected, (state, action) => {
@@ -145,7 +139,6 @@ const todosSlice = createSlice({
       })
       // toggleTodo
       .addCase(toggleTodo.fulfilled, (state, action) => {
-        // Гарантируем, что items всегда массив
         if (!Array.isArray(state.items)) {
           state.items = [];
         }
@@ -156,7 +149,6 @@ const todosSlice = createSlice({
       })
       // updateTodo
       .addCase(updateTodo.fulfilled, (state, action) => {
-        // Гарантируем, что items всегда массив
         if (!Array.isArray(state.items)) {
           state.items = [];
         }
@@ -167,7 +159,6 @@ const todosSlice = createSlice({
       })
       // deleteTodo
       .addCase(deleteTodo.fulfilled, (state, action) => {
-        // Гарантируем, что items всегда массив
         if (!Array.isArray(state.items)) {
           state.items = [];
         }

@@ -14,55 +14,48 @@ const api = axios.create({
 });
 
 export const todoApi = {
-  // Получить задачи с ПАГИНАЦИЕЙ
   getTodos: async (
     page: number = 1,
     limit: number = 10,
     filter?: string
   ): Promise<TodosResponse> => {
-    const params: any = { _page: page, _limit: limit }; // Исправлено: json-server использует _page и _limit
+    const params: any = { 
+      page: page, 
+      limit: limit 
+    };
+    
+    // Ваш сервер использует filter вместо completed
     if (filter && filter !== "all") {
-      params.completed = filter === "completed";
+      params.filter = filter; // active или completed
     }
 
     const response = await api.get("/todos", { params });
     
-    // Для json-server структура ответа
-    return {
-      data: response.data, // данные приходят напрямую в response.data
-      total: parseInt(response.headers['x-total-count'] || '0'),
-      page: page,
-      limit: limit,
-      totalPages: Math.ceil(parseInt(response.headers['x-total-count'] || '0') / limit)
-    };
+    // Ваш сервер уже возвращает правильную структуру
+    return response.data;
   },
 
-  // создать новое
   createTodo: async (todoData: CreateTodoRequest): Promise<Todo> => {
+    // Ваш сервер ожидает только text
     const response = await api.post("/todos", {
-      ...todoData,
-      completed: false // добавляем значение по умолчанию
+      text: todoData.text
     });
     return response.data;
   },
 
-  // обновить 
-  updateTodo: async (
-    id: number,
-    todoData: UpdateTodoRequest
-  ): Promise<Todo> => {
-    const response = await api.patch(`/todos/${id}`, todoData);
+  updateTodo: async (id: number, todoData: UpdateTodoRequest): Promise<Todo> => {
+    // Ваш сервер использует PUT вместо PATCH
+    const response = await api.put(`/todos/${id}`, todoData);
     return response.data;
   },
 
-  // удалить 
   deleteTodo: async (id: number): Promise<void> => {
     await api.delete(`/todos/${id}`);
   },
 
-  // Переключить статус задачи
   toggleTodo: async (id: number, completed: boolean): Promise<Todo> => {
-    const response = await api.patch(`/todos/${id}`, { completed });
+    // Ваш сервер имеет специальный endpoint для переключения
+    const response = await api.patch(`/todos/${id}/toggle`);
     return response.data;
   },
 };
