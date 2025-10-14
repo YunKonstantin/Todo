@@ -53,7 +53,7 @@ export const todoApi = {
     await api.delete(`/todos/${id}`);
   },
 
-  toggleTodo: async (id: number, completed: boolean): Promise<Todo> => {
+  toggleTodo: async (id: number, _completed: boolean): Promise<Todo> => {
     // Ваш сервер имеет специальный endpoint для переключения
     const response = await api.patch(`/todos/${id}/toggle`);
     return response.data;
