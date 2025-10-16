@@ -3,12 +3,12 @@ import {
   createAsyncThunk,
   type PayloadAction,
 } from "@reduxjs/toolkit";
-import type { Todo, FilterStatus, SortOrder } from "../../types/types";
+import { type FilterStatusType, type SortOrderType, type Todo, FilterStatus, SortOrder } from "../../types/types";
 import { todoApi } from "../../services/todoApi";
 
 interface TodoState {
   items: Todo[];
-  loading: boolean;
+  loading: boolean; //ТИПИПЗАЦИЯ ОБЬЕКТА
   error: string | null;
   pagination: {
     currentPage: number;
@@ -17,14 +17,14 @@ interface TodoState {
     itemsPerPage: number;
   };
   filters: {
-    status: FilterStatus;
-    sortOrder: SortOrder;
+    status: FilterStatusType;
+    sortOrder: SortOrderType;
   };
 }
 
 const initialState: TodoState = {
   items: [],
-  loading: false,
+  loading: false, //НАЧАЛЬНОЕ СОСТОЯНИЕ
   error: null,
   pagination: {
     currentPage: 1,
@@ -33,8 +33,8 @@ const initialState: TodoState = {
     itemsPerPage: 10,
   },
   filters: {
-    status: "all",
-    sortOrder: "newest",
+    status: FilterStatus.ALL,
+    sortOrder: SortOrder.NEWEST,
   },
 };
 
@@ -44,8 +44,8 @@ export const fetchTodos = createAsyncThunk(
     const state = getState() as { todos: TodoState };
     const { currentPage, itemsPerPage } = state.todos.pagination;
     const { status } = state.todos.filters;
-    
-    const response = await todoApi.getTodos(currentPage, itemsPerPage, status);
+
+    const response = await todoApi.getTodos(currentPage, itemsPerPage, status); //ЗАПРОС К СЕРВАКУ
     return response;
   }
 );
@@ -59,6 +59,7 @@ export const addTodo = createAsyncThunk(
 );
 
 export const toggleTodo = createAsyncThunk(
+  //СТАТУС
   "todos/toggleTodo",
   async ({ id, completed }: { id: number; completed: boolean }) => {
     const response = await todoApi.toggleTodo(id, completed);
@@ -86,11 +87,11 @@ const todosSlice = createSlice({
   name: "todos",
   initialState,
   reducers: {
-    setFilter: (state, action: PayloadAction<FilterStatus>) => {
+    setFilter: (state, action: PayloadAction<FilterStatusType>) => {
       state.filters.status = action.payload;
       state.pagination.currentPage = 1;
     },
-    setSortOrder: (state, action: PayloadAction<SortOrder>) => {
+    setSortOrder: (state, action: PayloadAction<SortOrderType>) => {
       state.filters.sortOrder = action.payload;
     },
     setPage: (state, action: PayloadAction<number>) => {
@@ -106,14 +107,16 @@ const todosSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // fetchTodos
+
       .addCase(fetchTodos.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchTodos.fulfilled, (state, action) => {
         state.loading = false;
-        state.items = Array.isArray(action.payload.data) ? action.payload.data : [];
+        state.items = Array.isArray(action.payload.data)
+          ? action.payload.data
+          : [];
         state.pagination = {
           currentPage: action.payload.page,
           totalPages: action.payload.totalPages,
@@ -125,7 +128,7 @@ const todosSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || "Failed to fetch todos";
       })
-      // addTodo
+
       .addCase(addTodo.pending, (state) => {
         state.loading = true;
       })
@@ -137,33 +140,40 @@ const todosSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || "Failed to add todo";
       })
-      // toggleTodo
+
       .addCase(toggleTodo.fulfilled, (state, action) => {
         if (!Array.isArray(state.items)) {
           state.items = [];
         }
-        const index = state.items.findIndex(todo => todo.id === action.payload.id);
+        const index = state.items.findIndex(
+          (todo) => todo.id === action.payload.id
+        );
         if (index !== -1) {
           state.items[index] = action.payload;
         }
       })
-      // updateTodo
+
       .addCase(updateTodo.fulfilled, (state, action) => {
         if (!Array.isArray(state.items)) {
           state.items = [];
         }
-        const index = state.items.findIndex(todo => todo.id === action.payload.id);
+        const index = state.items.findIndex(
+          (todo) => todo.id === action.payload.id
+        );
         if (index !== -1) {
           state.items[index] = action.payload;
         }
       })
-      // deleteTodo
+
       .addCase(deleteTodo.fulfilled, (state, action) => {
         if (!Array.isArray(state.items)) {
           state.items = [];
         }
-        state.items = state.items.filter(todo => todo.id !== action.payload);
-        state.pagination.totalItems = Math.max(0, state.pagination.totalItems - 1);
+        state.items = state.items.filter((todo) => todo.id !== action.payload);
+        state.pagination.totalItems = Math.max(
+          0,
+          state.pagination.totalItems - 1
+        );
       });
   },
 });

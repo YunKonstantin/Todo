@@ -23,9 +23,21 @@ export interface UpdateTodoRequest {
   completed?: boolean;
 }
 
-export type FilterStatus = "all" | "completed" | "active";
-export type SortOrder = "newest" | "oldest";
+export const enum FilterStatus {
+  ALL = "all",
+  COMPLETED = "completed",
+  ACTIVE = "active",
+}
+export const enum SortOrder {
+  NEWEST = "newest",
+  OLDEST = "oldest",
+}
+export type FilterStatusType =
+  | FilterStatus.ALL
+  | FilterStatus.COMPLETED
+  | FilterStatus.ACTIVE;
 
+export type SortOrderType = SortOrder.NEWEST | SortOrder.OLDEST;
 export interface PaginationState {
   currentPage: number;
   itemsPerPage: number;

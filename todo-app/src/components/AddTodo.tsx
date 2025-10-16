@@ -71,7 +71,7 @@ const AddTodo = ({ onAdd, theme = "light", disabled = false }: AddTodoProps) => 
   const [error, setError] = useState("");
 
   const handleAdd = () => {
-    if (disabled) return; // Блокируем добавление при disabled
+    if (disabled) return; 
     
     if (!text.trim()) {
       setError("Поле не может быть пустым");
@@ -89,7 +89,7 @@ const AddTodo = ({ onAdd, theme = "light", disabled = false }: AddTodoProps) => 
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (disabled) return; // Блокируем ввод при disabled
+    if (disabled) return; 
     
     setText(e.target.value);
     if (error) setError("");

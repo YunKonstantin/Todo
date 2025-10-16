@@ -77,7 +77,6 @@ const Pagination = ({
     startPage = Math.max(1, endPage - showPages + 1);
   }
 
-  // Кнопка "Назад"
   pages.push(
     <PageButton
       key="prev"
@@ -89,7 +88,6 @@ const Pagination = ({
     </PageButton>
   );
 
-  // Первая страница
   if (startPage > 1) {
     pages.push(
       <PageButton key={1} $themeMode={theme} onClick={() => onPageChange(1)}>
@@ -101,7 +99,6 @@ const Pagination = ({
     }
   }
 
-  // Основные страницы
   for (let i = startPage; i <= endPage; i++) {
     pages.push(
       <PageButton
@@ -115,7 +112,6 @@ const Pagination = ({
     );
   }
 
-  // Последняя страница
   if (endPage < totalPages) {
     if (endPage < totalPages - 1) {
       pages.push(<span key="end-ellipsis">...</span>);
@@ -131,7 +127,6 @@ const Pagination = ({
     );
   }
 
-  // Кнопка "Вперед"
   pages.push(
     <PageButton
       key="next"
