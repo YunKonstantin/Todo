@@ -3,12 +3,58 @@ import {
   createAsyncThunk,
   type PayloadAction,
 } from "@reduxjs/toolkit";
-import { type FilterStatusType, type SortOrderType, type Todo, FilterStatus, SortOrder } from "../../types/types";
+import {
+  type FilterStatusType,
+  type SortOrderType,
+  type Todo,
+  FilterStatus,
+  SortOrder,
+} from "../../types/types";
 import { todoApi } from "../../services/todoApi";
+
+// 🔥 ФУНКЦИИ ДЛЯ СОХРАНЕНИЯ СОСТОЯНИЯ
+const loadInitialState = (): TodoState => {
+  try {
+    const saved = localStorage.getItem("todos_state");
+    if (saved) {
+      const parsedState = JSON.parse(saved);
+      console.log("Загружено сохранённое состояние:", parsedState);
+      return parsedState;
+    }
+  } catch (error) {
+    console.error("Ошибка загрузки состояния:", error);
+  }
+
+  // Если нет сохранённого состояния, возвращаем initialState
+  return {
+    items: [],
+    loading: false,
+    error: null,
+    pagination: {
+      currentPage: 1,
+      totalPages: 1,
+      totalItems: 0,
+      itemsPerPage: 10,
+    },
+    filters: {
+      status: FilterStatus.ALL,
+      sortOrder: SortOrder.NEWEST,
+    },
+  };
+};
+
+// Функция для сохранения состояния
+const saveState = (state: TodoState) => {
+  try {
+    localStorage.setItem("todos_state", JSON.stringify(state));
+  } catch (error) {
+    console.error("Ошибка сохранения состояния:", error);
+  }
+};
 
 interface TodoState {
   items: Todo[];
-  loading: boolean; //ТИПИПЗАЦИЯ ОБЬЕКТА
+  loading: boolean;
   error: string | null;
   pagination: {
     currentPage: number;
@@ -22,21 +68,8 @@ interface TodoState {
   };
 }
 
-const initialState: TodoState = {
-  items: [],
-  loading: false, //НАЧАЛЬНОЕ СОСТОЯНИЕ
-  error: null,
-  pagination: {
-    currentPage: 1,
-    totalPages: 1,
-    totalItems: 0,
-    itemsPerPage: 10,
-  },
-  filters: {
-    status: FilterStatus.ALL,
-    sortOrder: SortOrder.NEWEST,
-  },
-};
+// 🔥 ИСПОЛЬЗУЕМ ФУНКЦИЮ ДЛЯ НАЧАЛЬНОГО СОСТОЯНИЯ
+const initialState: TodoState = loadInitialState();
 
 export const fetchTodos = createAsyncThunk(
   "todos/fetchTodos",
@@ -45,7 +78,7 @@ export const fetchTodos = createAsyncThunk(
     const { currentPage, itemsPerPage } = state.todos.pagination;
     const { status } = state.todos.filters;
 
-    const response = await todoApi.getTodos(currentPage, itemsPerPage, status); //ЗАПРОС К СЕРВАКУ
+    const response = await todoApi.getTodos(currentPage, itemsPerPage, status);
     return response;
   }
 );
@@ -59,7 +92,6 @@ export const addTodo = createAsyncThunk(
 );
 
 export const toggleTodo = createAsyncThunk(
-  //СТАТУС
   "todos/toggleTodo",
   async ({ id, completed }: { id: number; completed: boolean }) => {
     const response = await todoApi.toggleTodo(id, completed);
@@ -90,24 +122,28 @@ const todosSlice = createSlice({
     setFilter: (state, action: PayloadAction<FilterStatusType>) => {
       state.filters.status = action.payload;
       state.pagination.currentPage = 1;
+      saveState(state); // 🔥 СОХРАНЯЕМ ПОСЛЕ ИЗМЕНЕНИЯ
     },
     setSortOrder: (state, action: PayloadAction<SortOrderType>) => {
       state.filters.sortOrder = action.payload;
+      saveState(state); // 🔥 СОХРАНЯЕМ ПОСЛЕ ИЗМЕНЕНИЯ
     },
     setPage: (state, action: PayloadAction<number>) => {
       state.pagination.currentPage = action.payload;
+      saveState(state); // 🔥 СОХРАНЯЕМ ПОСЛЕ ИЗМЕНЕНИЯ
     },
     setItemsPerPage: (state, action: PayloadAction<number>) => {
       state.pagination.itemsPerPage = action.payload;
       state.pagination.currentPage = 1;
+      saveState(state); // 🔥 СОХРАНЯЕМ ПОСЛЕ ИЗМЕНЕНИЯ
     },
     clearError: (state) => {
       state.error = null;
+      saveState(state); // 🔥 СОХРАНЯЕМ ПОСЛЕ ИЗМЕНЕНИЯ
     },
   },
   extraReducers: (builder) => {
     builder
-
       .addCase(fetchTodos.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -123,10 +159,12 @@ const todosSlice = createSlice({
           totalItems: action.payload.total,
           itemsPerPage: action.payload.limit,
         };
+        saveState(state); // 🔥 СОХРАНЯЕМ ПОСЛЕ ЗАГРУЗКИ ЗАДАЧ
       })
       .addCase(fetchTodos.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Failed to fetch todos";
+        saveState(state); // 🔥 СОХРАНЯЕМ ДАЖЕ ПРИ ОШИБКЕ
       })
 
       .addCase(addTodo.pending, (state) => {
@@ -135,10 +173,12 @@ const todosSlice = createSlice({
       .addCase(addTodo.fulfilled, (state) => {
         state.loading = false;
         state.pagination.totalItems += 1;
+        saveState(state); // 🔥 СОХРАНЯЕМ ПОСЛЕ ДОБАВЛЕНИЯ
       })
       .addCase(addTodo.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Failed to add todo";
+        saveState(state); // 🔥 СОХРАНЯЕМ ДАЖЕ ПРИ ОШИБКЕ
       })
 
       .addCase(toggleTodo.fulfilled, (state, action) => {
@@ -151,6 +191,7 @@ const todosSlice = createSlice({
         if (index !== -1) {
           state.items[index] = action.payload;
         }
+        saveState(state); // 🔥 СОХРАНЯЕМ ПОСЛЕ ИЗМЕНЕНИЯ СТАТУСА
       })
 
       .addCase(updateTodo.fulfilled, (state, action) => {
@@ -163,6 +204,7 @@ const todosSlice = createSlice({
         if (index !== -1) {
           state.items[index] = action.payload;
         }
+        saveState(state); // 🔥 СОХРАНЯЕМ ПОСЛЕ РЕДАКТИРОВАНИЯ
       })
 
       .addCase(deleteTodo.fulfilled, (state, action) => {
@@ -174,6 +216,7 @@ const todosSlice = createSlice({
           0,
           state.pagination.totalItems - 1
         );
+        saveState(state); // 🔥 СОХРАНЯЕМ ПОСЛЕ УДАЛЕНИЯ
       });
   },
 });

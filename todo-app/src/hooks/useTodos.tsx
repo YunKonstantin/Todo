@@ -29,7 +29,13 @@ export const useTodos = () => {
 
   useEffect(() => {
     dispatch(fetchTodos());
-  }, [dispatch]);
+  }, [
+    dispatch,
+    pagination.currentPage, // ← отслеживаем страницу
+    pagination.itemsPerPage, // ← отслеживаем размер страницы
+    filters.status, // ← отслеживаем фильтр
+    filters.sortOrder,
+  ]);
 
   const handleAddTodoWithLoading = useCallback(
     async (text: string) => {

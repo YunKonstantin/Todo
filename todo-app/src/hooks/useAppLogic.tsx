@@ -1,10 +1,8 @@
-import { useTheme } from "./useTheme";
 import { useTodos } from "./useTodos";
 import { useTodoData } from "./useTodoData";
 import { useLoadingStates } from "./useLoadingStates";
 
 export const useAppLogic = () => {
-  const { theme, toggleTheme } = useTheme();
   const {
     todos,
     loading,
@@ -30,8 +28,6 @@ export const useAppLogic = () => {
   });
 
   return {
-    theme,
-    toggleTheme,
     isLoading,
     isFilterSortDisabled,
     error,

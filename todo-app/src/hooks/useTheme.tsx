@@ -1,8 +1,21 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext, createContext } from "react";
 
 export type ThemeMode = "light" | "dark";
 
-export const useTheme = () => {
+interface ThemeContextType {
+  theme: ThemeMode;
+  toggleTheme: () => void;
+  isDark: boolean;
+  isLight: boolean;
+}
+
+export const ThemeContext = createContext<ThemeContextType | undefined>(
+  undefined
+);
+
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const getInitialTheme = (): ThemeMode => {
     const savedTheme = localStorage.getItem("theme") as ThemeMode;
     if (savedTheme && (savedTheme === "light" || savedTheme === "dark")) {
@@ -24,7 +37,6 @@ export const useTheme = () => {
   const toggleTheme = () => {
     setTheme((prevTheme) => {
       const newTheme = prevTheme === "light" ? "dark" : "light";
-      // Сохраняем в localStorage
       localStorage.setItem("theme", newTheme);
       return newTheme;
     });
@@ -59,10 +71,22 @@ export const useTheme = () => {
     };
   }, []);
 
-  return {
+  const value = {
     theme,
     toggleTheme,
     isDark: theme === "dark",
     isLight: theme === "light",
   };
+
+  return (
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  );
+};
+
+export const useTheme = () => {
+  const context = useContext(ThemeContext);
+  if (!context) {
+    throw new Error("useTheme must be used within a ThemeProvider");
+  }
+  return context;
 };
