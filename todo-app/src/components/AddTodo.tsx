@@ -4,7 +4,7 @@ import styled from "styled-components";
 interface AddTodoProps {
   onAdd: (text: string) => void;
   theme?: "light" | "dark";
-  disabled?: boolean; // Добавляем disabled проп
+  disabled?: boolean;
 }
 
 const Container = styled.div`
@@ -19,7 +19,10 @@ const InputRow = styled.div`
   gap: 8px;
 `;
 
-const Input = styled.input<{ $themeMode: "light" | "dark"; disabled?: boolean }>`
+const Input = styled.input<{
+  $themeMode: "light" | "dark";
+  disabled?: boolean;
+}>`
   flex: 1;
   padding: 8px;
   border: 1px solid
@@ -29,7 +32,7 @@ const Input = styled.input<{ $themeMode: "light" | "dark"; disabled?: boolean }>
     $themeMode === "light" ? "#fff" : "#333"};
   color: ${({ $themeMode }) => ($themeMode === "light" ? "#000" : "#fff")};
   opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
-  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'text')};
+  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "text")};
 
   &:focus {
     outline: none;
@@ -43,20 +46,23 @@ const Input = styled.input<{ $themeMode: "light" | "dark"; disabled?: boolean }>
   }
 `;
 
-const Button = styled.button<{ $themeMode: "light" | "dark"; disabled?: boolean }>`
+const Button = styled.button<{
+  $themeMode: "light" | "dark";
+  disabled?: boolean;
+}>`
   padding: 8px 12px;
   background-color: ${({ $themeMode, disabled }) =>
-    disabled ? '#ccc' : $themeMode === "light" ? "#2196f3" : "#90caf9"};
-  color: ${({ $themeMode, disabled }) => 
-    disabled ? '#666' : ($themeMode === "light" ? "#fff" : "#000")};
+    disabled ? "#ccc" : $themeMode === "light" ? "#2196f3" : "#90caf9"};
+  color: ${({ $themeMode, disabled }) =>
+    disabled ? "#666" : $themeMode === "light" ? "#fff" : "#000"};
   border: none;
   border-radius: 4px;
-  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
+  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
   opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
 
   &:hover {
     background-color: ${({ $themeMode, disabled }) =>
-      disabled ? '#ccc' : $themeMode === "light" ? "#1976d2" : "#64b5f6"};
+      disabled ? "#ccc" : $themeMode === "light" ? "#1976d2" : "#64b5f6"};
   }
 `;
 
@@ -66,13 +72,17 @@ const ErrorText = styled.p`
   font-size: 0.875rem;
 `;
 
-const AddTodo = ({ onAdd, theme = "light", disabled = false }: AddTodoProps) => {
+const AddTodo = ({
+  onAdd,
+  theme = "light",
+  disabled = false,
+}: AddTodoProps) => {
   const [text, setText] = useState("");
   const [error, setError] = useState("");
 
   const handleAdd = () => {
-    if (disabled) return; 
-    
+    if (disabled) return;
+
     if (!text.trim()) {
       setError("Поле не может быть пустым");
       return;
@@ -89,8 +99,8 @@ const AddTodo = ({ onAdd, theme = "light", disabled = false }: AddTodoProps) => 
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (disabled) return; 
-    
+    if (disabled) return;
+
     setText(e.target.value);
     if (error) setError("");
   };
@@ -106,11 +116,7 @@ const AddTodo = ({ onAdd, theme = "light", disabled = false }: AddTodoProps) => 
           placeholder={disabled ? "Добавление..." : "Новая задача..."}
           disabled={disabled}
         />
-        <Button 
-          $themeMode={theme} 
-          onClick={handleAdd}
-          disabled={disabled}
-        >
+        <Button $themeMode={theme} onClick={handleAdd} disabled={disabled}>
           {disabled ? "..." : "Добавить"}
         </Button>
       </InputRow>

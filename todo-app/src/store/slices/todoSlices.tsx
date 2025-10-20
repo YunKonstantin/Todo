@@ -7,25 +7,23 @@ import {
   type FilterStatusType,
   type SortOrderType,
   type Todo,
+  type TodosResponse,
   FilterStatus,
   SortOrder,
-} from "../../types/types";
+} from "../../types";
 import { todoApi } from "../../services/todoApi";
 
-// 🔥 ФУНКЦИИ ДЛЯ СОХРАНЕНИЯ СОСТОЯНИЯ
 const loadInitialState = (): TodoState => {
   try {
     const saved = localStorage.getItem("todos_state");
     if (saved) {
       const parsedState = JSON.parse(saved);
-      console.log("Загружено сохранённое состояние:", parsedState);
       return parsedState;
     }
   } catch (error) {
-    console.error("Ошибка загрузки состояния:", error);
+    console.error("ошибка в localStorage! :", error);
   }
 
-  // Если нет сохранённого состояния, возвращаем initialState
   return {
     items: [],
     loading: false,
@@ -43,12 +41,11 @@ const loadInitialState = (): TodoState => {
   };
 };
 
-// Функция для сохранения состояния
 const saveState = (state: TodoState) => {
   try {
     localStorage.setItem("todos_state", JSON.stringify(state));
   } catch (error) {
-    console.error("Ошибка сохранения состояния:", error);
+    console.error("ошибка сохранения", error);
   }
 };
 
@@ -68,50 +65,75 @@ interface TodoState {
   };
 }
 
-// 🔥 ИСПОЛЬЗУЕМ ФУНКЦИЮ ДЛЯ НАЧАЛЬНОГО СОСТОЯНИЯ
 const initialState: TodoState = loadInitialState();
 
 export const fetchTodos = createAsyncThunk(
   "todos/fetchTodos",
-  async (_, { getState }) => {
-    const state = getState() as { todos: TodoState };
-    const { currentPage, itemsPerPage } = state.todos.pagination;
-    const { status } = state.todos.filters;
+  async (_, { getState, rejectWithValue }) => {
+    try {
+      const state = getState() as { todos: TodoState };
+      const { currentPage, itemsPerPage } = state.todos.pagination;
+      const { status } = state.todos.filters;
 
-    const response = await todoApi.getTodos(currentPage, itemsPerPage, status);
-    return response;
+      const response = await todoApi.getTodos(
+        currentPage,
+        itemsPerPage,
+        status
+      );
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error.message || "ошибка");
+    }
   }
 );
 
 export const addTodo = createAsyncThunk(
   "todos/addTodo",
-  async (text: string) => {
-    const response = await todoApi.createTodo({ text });
-    return response;
+  async (text: string, { rejectWithValue }) => {
+    try {
+      const response = await todoApi.createTodo({ text });
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error.message || "ошибка добавления");
+    }
   }
 );
-
 export const toggleTodo = createAsyncThunk(
   "todos/toggleTodo",
-  async ({ id, completed }: { id: number; completed: boolean }) => {
-    const response = await todoApi.toggleTodo(id, completed);
-    return response;
+  async (
+    { id, completed }: { id: number; completed: boolean },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await todoApi.toggleTodo(id, completed);
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error.message || "ошибка переключения ");
+    }
   }
 );
 
 export const updateTodo = createAsyncThunk(
   "todos/updateTodo",
-  async ({ id, text }: { id: number; text: string }) => {
-    const response = await todoApi.updateTodo(id, { text });
-    return response;
+  async ({ id, text }: { id: number; text: string }, { rejectWithValue }) => {
+    try {
+      const response = await todoApi.updateTodo(id, { text });
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error.message || "ошибка обновления");
+    }
   }
 );
 
 export const deleteTodo = createAsyncThunk(
   "todos/deleteTodo",
-  async (id: number) => {
-    await todoApi.deleteTodo(id);
-    return id;
+  async (id: number, { rejectWithValue }) => {
+    try {
+      await todoApi.deleteTodo(id);
+      return id;
+    } catch (error: any) {
+      return rejectWithValue(error.message || "оштбка удаления");
+    }
   }
 );
 
@@ -122,24 +144,24 @@ const todosSlice = createSlice({
     setFilter: (state, action: PayloadAction<FilterStatusType>) => {
       state.filters.status = action.payload;
       state.pagination.currentPage = 1;
-      saveState(state); // 🔥 СОХРАНЯЕМ ПОСЛЕ ИЗМЕНЕНИЯ
+      saveState(state);
     },
     setSortOrder: (state, action: PayloadAction<SortOrderType>) => {
       state.filters.sortOrder = action.payload;
-      saveState(state); // 🔥 СОХРАНЯЕМ ПОСЛЕ ИЗМЕНЕНИЯ
+      saveState(state);
     },
     setPage: (state, action: PayloadAction<number>) => {
       state.pagination.currentPage = action.payload;
-      saveState(state); // 🔥 СОХРАНЯЕМ ПОСЛЕ ИЗМЕНЕНИЯ
+      saveState(state);
     },
     setItemsPerPage: (state, action: PayloadAction<number>) => {
       state.pagination.itemsPerPage = action.payload;
       state.pagination.currentPage = 1;
-      saveState(state); // 🔥 СОХРАНЯЕМ ПОСЛЕ ИЗМЕНЕНИЯ
+      saveState(state);
     },
     clearError: (state) => {
       state.error = null;
-      saveState(state); // 🔥 СОХРАНЯЕМ ПОСЛЕ ИЗМЕНЕНИЯ
+      saveState(state);
     },
   },
   extraReducers: (builder) => {
@@ -150,21 +172,22 @@ const todosSlice = createSlice({
       })
       .addCase(fetchTodos.fulfilled, (state, action) => {
         state.loading = false;
-        state.items = Array.isArray(action.payload.data)
-          ? action.payload.data
-          : [];
+        const payload = action.payload as TodosResponse;
+        state.items = Array.isArray(payload.data) ? payload.data : [];
         state.pagination = {
-          currentPage: action.payload.page,
-          totalPages: action.payload.totalPages,
-          totalItems: action.payload.total,
-          itemsPerPage: action.payload.limit,
+          currentPage: payload.page,
+          totalPages: payload.totalPages,
+          totalItems: payload.total,
+          itemsPerPage: payload.limit,
         };
-        saveState(state); // 🔥 СОХРАНЯЕМ ПОСЛЕ ЗАГРУЗКИ ЗАДАЧ
+        saveState(state);
       })
       .addCase(fetchTodos.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || "Failed to fetch todos";
-        saveState(state); // 🔥 СОХРАНЯЕМ ДАЖЕ ПРИ ОШИБКЕ
+        state.error =
+          (action.payload as string) ||
+          action.error.message ||
+          "ошибка запроса";
       })
 
       .addCase(addTodo.pending, (state) => {
@@ -173,25 +196,34 @@ const todosSlice = createSlice({
       .addCase(addTodo.fulfilled, (state) => {
         state.loading = false;
         state.pagination.totalItems += 1;
-        saveState(state); // 🔥 СОХРАНЯЕМ ПОСЛЕ ДОБАВЛЕНИЯ
+        saveState(state);
       })
       .addCase(addTodo.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || "Failed to add todo";
-        saveState(state); // 🔥 СОХРАНЯЕМ ДАЖЕ ПРИ ОШИБКЕ
+        state.error =
+          (action.payload as string) ||
+          action.error.message ||
+          "ошибка обновления";
+        saveState(state);
       })
 
       .addCase(toggleTodo.fulfilled, (state, action) => {
         if (!Array.isArray(state.items)) {
           state.items = [];
         }
-        const index = state.items.findIndex(
-          (todo) => todo.id === action.payload.id
-        );
+        const payload = action.payload as Todo;
+        const index = state.items.findIndex((todo) => todo.id === payload.id);
         if (index !== -1) {
-          state.items[index] = action.payload;
+          state.items[index] = payload;
         }
-        saveState(state); // 🔥 СОХРАНЯЕМ ПОСЛЕ ИЗМЕНЕНИЯ СТАТУСА
+        saveState(state);
+      })
+      .addCase(toggleTodo.rejected, (state, action) => {
+        state.error =
+          (action.payload as string) ||
+          action.error.message ||
+          "ошибка переключения";
+        saveState(state);
       })
 
       .addCase(updateTodo.fulfilled, (state, action) => {
@@ -204,9 +236,15 @@ const todosSlice = createSlice({
         if (index !== -1) {
           state.items[index] = action.payload;
         }
-        saveState(state); // 🔥 СОХРАНЯЕМ ПОСЛЕ РЕДАКТИРОВАНИЯ
+        saveState(state);
       })
-
+      .addCase(updateTodo.rejected, (state, action) => {
+        state.error =
+          (action.payload as string) ||
+          action.error.message ||
+          "ошибка обновления";
+        saveState(state);
+      })
       .addCase(deleteTodo.fulfilled, (state, action) => {
         if (!Array.isArray(state.items)) {
           state.items = [];
@@ -216,7 +254,14 @@ const todosSlice = createSlice({
           0,
           state.pagination.totalItems - 1
         );
-        saveState(state); // 🔥 СОХРАНЯЕМ ПОСЛЕ УДАЛЕНИЯ
+        saveState(state);
+      })
+      .addCase(deleteTodo.rejected, (state, action) => {
+        state.error =
+          (action.payload as string) ||
+          action.error.message ||
+          "ошибка удаления";
+        saveState(state);
       });
   },
 });

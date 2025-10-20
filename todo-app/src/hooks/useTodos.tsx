@@ -12,7 +12,7 @@ import {
   updateTodo,
   clearError,
 } from "../store/slices/todoSlices";
-import type { FilterStatusType, SortOrderType } from "../types/types";
+import type { FilterStatusType, SortOrderType } from "../types";
 
 export const useTodos = () => {
   const dispatch = useAppDispatch();
@@ -24,16 +24,15 @@ export const useTodos = () => {
     filters,
   } = useAppSelector((state) => state.todos);
 
-  // 🔥 Добавляем состояние для локальной загрузки
   const [localLoading, setLocalLoading] = useState(false);
 
   useEffect(() => {
     dispatch(fetchTodos());
   }, [
     dispatch,
-    pagination.currentPage, // ← отслеживаем страницу
-    pagination.itemsPerPage, // ← отслеживаем размер страницы
-    filters.status, // ← отслеживаем фильтр
+    pagination.currentPage,
+    pagination.itemsPerPage,
+    filters.status,
     filters.sortOrder,
   ]);
 

@@ -1,6 +1,5 @@
 import styled, { keyframes, createGlobalStyle } from "styled-components";
 
-// Исправлено: createGlobalStyle используется напрямую, а не через styled.
 export const GlobalStyle = createGlobalStyle<{
   $themeMode: "light" | "dark";
 }>`
@@ -17,7 +16,6 @@ export const GlobalStyle = createGlobalStyle<{
   }
 `;
 
-// Остальной код остается без изменений
 export const AppContainer = styled.div`
   display: flex;
   flex-direction: column;

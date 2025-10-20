@@ -1,6 +1,6 @@
 import { useState } from "react";
 import styled from "styled-components";
-import type { Todo } from "../types/types";
+import type { Todo } from "../types";
 import TodoItem from "./TodoItem";
 import EditTodo from "./EditTodo";
 

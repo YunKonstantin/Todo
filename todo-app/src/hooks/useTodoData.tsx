@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import type { Todo } from "../types/types";
-import type { FilterStatusType, SortOrderType } from "../types/types";
+import type { Todo } from "../types";
+import type { FilterStatusType, SortOrderType } from "../types";
 
 interface UseTodoDataProps {
   todos: Todo[];

@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import { useAppDispatch, useAppSelector } from "../hooks/redux";
 import { setFilter, setSortOrder, setItemsPerPage } from "../store/slices/todoSlices";
-import type { FilterStatus, SortOrder } from "../types/types";
+import type { FilterStatus, SortOrder } from "../types";
 
 const Container = styled.div`
   display: flex;

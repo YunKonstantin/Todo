@@ -3,8 +3,8 @@ import AddTodo from "./AddTodo";
 import TodoList from "./TodoList";
 import Pagination from "./Pagination";
 import { useAppLogic } from "../hooks/useAppLogic";
-import { useTheme } from "../hooks/useTheme"; // ← ИМПОРТИРУЕМ ХУК ТЕМЫ
-import type { FilterStatusType, SortOrderType } from "../types/types";
+import { useTheme } from "../hooks/useTheme";
+import type { FilterStatusType, SortOrderType } from "../types";
 import {
   Card,
   Title,
@@ -18,10 +18,10 @@ import {
 } from "../styles/AppStyles";
 
 export const TodoDashboard: React.FC = () => {
-  // 🔥 ПОЛУЧАЕМ ТЕМУ ИЗ КОНТЕКСТА
+ 
   const { theme, toggleTheme } = useTheme();
 
-  // 🔥 ПОЛУЧАЕМ ВСЮ ЛОГИКУ ПРИЛОЖЕНИЯ
+
   const {
     isLoading,
     isFilterSortDisabled,
