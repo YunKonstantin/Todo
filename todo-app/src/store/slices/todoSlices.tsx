@@ -32,7 +32,7 @@ const loadInitialState = (): TodoState => {
       currentPage: 1,
       totalPages: 1,
       totalItems: 0,
-      itemsPerPage: 10,
+      itemsPerPage: 5,
     },
     filters: {
       status: FilterStatus.ALL,
@@ -70,6 +70,7 @@ const initialState: TodoState = loadInitialState();
 export const fetchTodos = createAsyncThunk(
   "todos/fetchTodos",
   async (_, { getState, rejectWithValue }) => {
+    //заглушка
     try {
       const state = getState() as { todos: TodoState };
       const { currentPage, itemsPerPage } = state.todos.pagination;
@@ -173,6 +174,7 @@ const todosSlice = createSlice({
       .addCase(fetchTodos.fulfilled, (state, action) => {
         state.loading = false;
         const payload = action.payload as TodosResponse;
+
         state.items = Array.isArray(payload.data) ? payload.data : [];
         state.pagination = {
           currentPage: payload.page,
@@ -254,6 +256,12 @@ const todosSlice = createSlice({
           0,
           state.pagination.totalItems - 1
         );
+
+        const itemsOnCurrentPage = state.items.length;
+        if (itemsOnCurrentPage === 0 && state.pagination.currentPage > 1) {
+          state.pagination.currentPage = state.pagination.currentPage - 1;
+        }
+
         saveState(state);
       })
       .addCase(deleteTodo.rejected, (state, action) => {

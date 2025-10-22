@@ -36,6 +36,8 @@ const PageButton = styled.button<{
   border-radius: 4px;
   cursor: pointer;
   min-width: 40px;
+  font-weight: ${({ $active }) => ($active ? "bold" : "normal")};
+  transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
     background-color: ${({ $active, $themeMode }) =>
@@ -46,20 +48,36 @@ const PageButton = styled.button<{
         : $themeMode === "light"
         ? "#f5f5f5"
         : "#444"};
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
 
   &:disabled {
     cursor: not-allowed;
     opacity: 0.5;
+    transform: none;
+    box-shadow: none;
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
   }
 `;
 
 const PageInfo = styled.span<{ $themeMode: "light" | "dark" }>`
   color: ${({ $themeMode }) => ($themeMode === "light" ? "#000" : "#fff")};
   font-size: 14px;
+  margin-right: 16px;
+  font-weight: 500;
 `;
 
-const Pagination = ({
+const Ellipsis = styled.span<{ $themeMode: "light" | "dark" }>`
+  color: ${({ $themeMode }) => ($themeMode === "light" ? "#666" : "#999")};
+  padding: 0 4px;
+  user-select: none;
+`;
+
+export const Pagination = ({
   currentPage,
   totalPages,
   onPageChange,
@@ -67,85 +85,86 @@ const Pagination = ({
 }: PaginationProps) => {
   if (totalPages <= 1) return null;
 
-  const pages = [];
-  const showPages = 5;
+  const getVisiblePages = () => {
+    const visiblePages = [];
+    const showPages = 5;
 
-  let startPage = Math.max(1, currentPage - Math.floor(showPages / 2));
-  let endPage = Math.min(totalPages, startPage + showPages - 1);
+    let start = Math.max(1, currentPage - 2);
+    let end = Math.min(totalPages, start + showPages - 1);
 
-  if (endPage - startPage + 1 < showPages) {
-    startPage = Math.max(1, endPage - showPages + 1);
-  }
-
-  pages.push(
-    <PageButton
-      key="prev"
-      $themeMode={theme}
-      onClick={() => onPageChange(currentPage - 1)}
-      disabled={currentPage === 1}
-    >
-      ←
-    </PageButton>
-  );
-
-  if (startPage > 1) {
-    pages.push(
-      <PageButton key={1} $themeMode={theme} onClick={() => onPageChange(1)}>
-        1
-      </PageButton>
-    );
-    if (startPage > 2) {
-      pages.push(<span key="start-ellipsis">...</span>);
+    if (end - start + 1 < showPages) {
+      start = Math.max(1, end - showPages + 1);
     }
-  }
 
-  for (let i = startPage; i <= endPage; i++) {
-    pages.push(
-      <PageButton
-        key={i}
-        $themeMode={theme}
-        $active={i === currentPage}
-        onClick={() => onPageChange(i)}
-      >
-        {i}
-      </PageButton>
-    );
-  }
-
-  if (endPage < totalPages) {
-    if (endPage < totalPages - 1) {
-      pages.push(<span key="end-ellipsis">...</span>);
+    for (let i = start; i <= end; i++) {
+      visiblePages.push(i);
     }
-    pages.push(
-      <PageButton
-        key={totalPages}
-        $themeMode={theme}
-        onClick={() => onPageChange(totalPages)}
-      >
-        {totalPages}
-      </PageButton>
-    );
-  }
 
-  pages.push(
-    <PageButton
-      key="next"
-      $themeMode={theme}
-      onClick={() => onPageChange(currentPage + 1)}
-      disabled={currentPage === totalPages}
-    >
-      →
-    </PageButton>
-  );
+    return visiblePages;
+  };
+
+  const visiblePages = getVisiblePages();
 
   return (
     <PaginationContainer>
       <PageInfo $themeMode={theme}>
         Страница {currentPage} из {totalPages}
       </PageInfo>
-      {pages}
+
+      <PageButton
+        $themeMode={theme}
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        aria-label="Предыдущая страница"
+      >
+        ←
+      </PageButton>
+
+      {visiblePages[0] > 1 && (
+        <>
+          <PageButton $themeMode={theme} onClick={() => onPageChange(1)}>
+            1
+          </PageButton>
+          {visiblePages[0] > 2 && <Ellipsis $themeMode={theme}>...</Ellipsis>}
+        </>
+      )}
+
+      {visiblePages.map((page) => (
+        <PageButton
+          key={page}
+          $themeMode={theme}
+          $active={page === currentPage}
+          onClick={() => onPageChange(page)}
+          aria-label={`Страница ${page}`}
+          aria-current={page === currentPage ? "page" : undefined}
+        >
+          {page}
+        </PageButton>
+      ))}
+
+      {visiblePages[visiblePages.length - 1] < totalPages && (
+        <>
+          {visiblePages[visiblePages.length - 1] < totalPages - 1 && (
+            <Ellipsis $themeMode={theme}>...</Ellipsis>
+          )}
+          <PageButton
+            $themeMode={theme}
+            onClick={() => onPageChange(totalPages)}
+            aria-label={`Последняя страница ${totalPages}`}
+          >
+            {totalPages}
+          </PageButton>
+        </>
+      )}
+
+      <PageButton
+        $themeMode={theme}
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        aria-label="Следующая страница"
+      >
+        →
+      </PageButton>
     </PaginationContainer>
   );
 };
-
-export default Pagination;

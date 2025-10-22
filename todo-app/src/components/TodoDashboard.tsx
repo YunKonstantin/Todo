@@ -1,7 +1,7 @@
 import React from "react";
 import AddTodo from "./AddTodo";
 import TodoList from "./TodoList";
-import Pagination from "./Pagination";
+import { Pagination } from "./Pagination";
 import { useAppLogic } from "../hooks/useAppLogic";
 import { useTheme } from "../hooks/useTheme";
 import type { FilterStatusType, SortOrderType } from "../types";
@@ -18,9 +18,7 @@ import {
 } from "../styles/AppStyles";
 
 export const TodoDashboard: React.FC = () => {
- 
   const { theme, toggleTheme } = useTheme();
-
 
   const {
     isLoading,
