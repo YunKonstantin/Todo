@@ -20,7 +20,7 @@ export const todoApi = {
     filter?: string
   ): Promise<TodosResponse> => {
     try {
-      const params: any = {
+      const params: any = {//any
         page: page,
         limit: limit,
       };

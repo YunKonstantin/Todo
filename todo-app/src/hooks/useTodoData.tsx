@@ -11,7 +11,7 @@ interface UseTodoDataProps {
 }
 
 export const useTodoData = ({ todos, filters }: UseTodoDataProps) => {
-  const displayedTodos = useMemo(() => {
+  const displayedTodos = useMemo(() => {//useCallback
     const safeTodos = Array.isArray(todos) ? todos : [];
 
     let filteredTodos = safeTodos;

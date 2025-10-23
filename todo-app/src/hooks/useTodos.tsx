@@ -29,7 +29,7 @@ export const useTodos = () => {
   useEffect(() => {
     dispatch(fetchTodos());
   }, [
-    dispatch,  //леша
+    dispatch,  
     pagination.currentPage,
     pagination.itemsPerPage,
     filters.status,

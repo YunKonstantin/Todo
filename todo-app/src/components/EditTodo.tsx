@@ -19,7 +19,7 @@ const Input = styled.input`
   padding: 6px 10px;
   border-radius: 6px;
   border: 1px solid #ccc;
-  
+
   &:focus {
     outline: none;
     border-color: #2196f3;
@@ -102,13 +102,9 @@ const EditTodo = ({ initialText, onSave, onCancel }: EditTodoProps) => {
       {error && <ErrorText>{error}</ErrorText>}
 
       <ButtonContainer>
-        <SaveButton onClick={handleSave}>
-          Сохранить
-        </SaveButton>
+        <SaveButton onClick={handleSave}>Сохранить</SaveButton>
 
-        <CancelButton onClick={onCancel}>
-          Отменить
-        </CancelButton>
+        <CancelButton onClick={onCancel}>Отменить</CancelButton>
       </ButtonContainer>
     </Container>
   );

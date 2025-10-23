@@ -99,12 +99,12 @@ export const Pagination = ({
     for (let i = start; i <= end; i++) {
       visiblePages.push(i);
     }
-
+   
     return visiblePages;
   };
 
   const visiblePages = getVisiblePages();
-
+ console.log(visiblePages);
   return (
     <PaginationContainer>
       <PageInfo $themeMode={theme}>

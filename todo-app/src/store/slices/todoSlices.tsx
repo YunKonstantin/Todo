@@ -70,7 +70,6 @@ const initialState: TodoState = loadInitialState();
 export const fetchTodos = createAsyncThunk(
   "todos/fetchTodos",
   async (_, { getState, rejectWithValue }) => {
-    //заглушка
     try {
       const state = getState() as { todos: TodoState };
       const { currentPage, itemsPerPage } = state.todos.pagination;

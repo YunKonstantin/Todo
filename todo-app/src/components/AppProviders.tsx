@@ -3,6 +3,7 @@ import { Provider } from "react-redux";
 import { store } from "../store";
 import { ThemeProvider, useTheme } from "../hooks/useTheme";
 import { GlobalStyle } from "../styles/AppStyles";
+import { BrowserRouter as Router } from "react-router-dom";
 
 interface AppProvidersProps {
   children: ReactNode;
@@ -12,9 +13,11 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
   return (
     <Provider store={store}>
       <ThemeProvider>
-        {" "}
-        <GlobalStyleWithTheme />
-        {children}
+        <Router>
+          {" "}
+          <GlobalStyleWithTheme />
+          {children}
+        </Router>
       </ThemeProvider>
     </Provider>
   );
