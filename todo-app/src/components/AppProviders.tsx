@@ -14,7 +14,7 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
   return (
     <Provider store={store}>
       <ThemeProvider>
-        <Router basename="/Todo">
+        <Router>
           <ErrorBoundary>
             <GlobalStyleWithTheme />
             {children}

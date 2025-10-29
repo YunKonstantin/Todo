@@ -1,12 +1,18 @@
 
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import type { RootState } from '../store';
-import { logoutUser } from '../store/slices/authSlice';
+import type { AppDispatch, RootState } from '../store';
+import { fetchUserProfile, logoutUser } from '../store/slices/authSlice';
+import { useEffect } from 'react';
 
 export const Header = () => {
   const { token, user } = useSelector((state: RootState) => state.auth);
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
+   useEffect(() => {
+    if (token && !user) {
+      dispatch(fetchUserProfile());
+    }
+  }, [token, user, dispatch]);
   const navigate = useNavigate();
   const handleLogout = () => {
     dispatch(logoutUser());

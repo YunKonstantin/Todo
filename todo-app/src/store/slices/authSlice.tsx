@@ -54,15 +54,28 @@ export const loginUser = createAsyncThunk(
   "auth/login",
   async (credentials: LoginData, { rejectWithValue }) => {
     try {
-      const response = await authAPI.login(credentials);
-      const { accessToken, refreshToken, user } = response.data;
-
-      localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("refreshToken", refreshToken);
-
-      return { user, token: accessToken };
+      // ВРЕМЕННО: мок для тестирования
+      console.log('Моковый вход для:', credentials.email);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const mockResponse = {
+        user: { 
+          id: 1, 
+          email: credentials.email,
+          age: 25,
+          createdAt: new Date().toISOString()
+        },
+        accessToken: 'mock-token-123',
+        refreshToken: 'mock-refresh-123'
+      };
+      
+      localStorage.setItem("accessToken", mockResponse.accessToken);
+      localStorage.setItem("refreshToken", mockResponse.refreshToken);
+      
+      return { user: mockResponse.user, token: mockResponse.accessToken };
+      
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || "Ошибка входа");
+      return rejectWithValue("Ошибка входа");
     }
   }
 );

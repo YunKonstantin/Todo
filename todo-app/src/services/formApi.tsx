@@ -5,6 +5,7 @@ import axios, {
 } from "axios";
 import { store } from "../store";
 import { logoutUser, setToken } from "../store/slices/authSlice";
+
 export interface RegisterData {
   email: string;
   password: string;
@@ -12,6 +13,7 @@ export interface RegisterData {
 }
 
 const API_URL = "http://localhost:3001";
+
 export interface LoginData {
   email: string;
   password: string;
@@ -34,6 +36,21 @@ export interface ChangePasswordData {
   oldPassword: string;
   newPassword: string;
 }
+
+export interface Todo {
+  id: number;
+  title: string;
+  completed: boolean;
+  userId: number;
+  createdAt: string;
+}
+
+export interface CreateTodoData {
+  title: string;
+  completed?: boolean;
+  userId: number;
+}
+
 const api: AxiosInstance = axios.create({
   baseURL: API_URL,
   headers: {
@@ -51,7 +68,7 @@ api.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
-//user get
+
 api.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error) => {
@@ -77,12 +94,12 @@ api.interceptors.response.use(
           return api(originalRequest);
         } catch (refreshError) {
           store.dispatch(logoutUser());
-          window.location.href = "/Todo/login";
+          window.location.href = "/login";
           return Promise.reject(refreshError);
         }
       } else {
         store.dispatch(logoutUser());
-        window.location.href = "/Todo/login";
+        window.location.href = "/login";
       }
     }
 
@@ -104,13 +121,16 @@ export const authAPI = {
 };
 
 export const todosAPI = {
-  getTodos: (): Promise<AxiosResponse<any[]>> => api.get("/todos"),
+  getTodos: (userId: number): Promise<AxiosResponse<Todo[]>> =>
+    api.get(`/todos?userId=${userId}`),
 
-  createTodo: (data: any): Promise<AxiosResponse<any>> =>
+  createTodo: (data: CreateTodoData): Promise<AxiosResponse<Todo>> =>
     api.post("/todos", data),
 
-  updateTodo: (id: number, data: any): Promise<AxiosResponse<any>> =>
-    api.put(`/todos/${id}`, data),
+  updateTodo: (
+    id: number,
+    data: Partial<CreateTodoData>
+  ): Promise<AxiosResponse<Todo>> => api.put(`/todos/${id}`, data),
 
   deleteTodo: (id: number): Promise<AxiosResponse<void>> =>
     api.delete(`/todos/${id}`),
