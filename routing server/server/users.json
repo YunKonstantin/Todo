@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "id": 1761662437328,
+    "email": "yunkonstantin@icloud.com",
+    "password": "$2a$10$w5IaMptcbfyyiqHw2xOMDOymtuA0pgGGap5SvVekSzAcVe.eBc58C",
+    "age": null,
+    "createdAt": "2025-10-28T14:40:37.328Z"
+  },
+  {
+    "id": 1761663990930,
+    "email": "walera@icloud.com",
+    "password": "$2a$10$Q15OvJYTA9TvGEvTCxdb2.nMcdTCCv3qDehnBQPqEzJAdew03/ee.",
+    "age": 44,
+    "createdAt": "2025-10-28T15:06:30.930Z"
+  }
+]

@@ -1,0 +1,43 @@
+
+import { useSelector, useDispatch } from 'react-redux';
+import { Link, useNavigate } from 'react-router-dom';
+import type { RootState } from '../store';
+import { logoutUser } from '../store/slices/authSlice';
+
+export const Header = () => {
+  const { token, user } = useSelector((state: RootState) => state.auth);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    dispatch(logoutUser());
+    navigate('/login');
+  };
+
+  return (
+    <header className="header">
+      <div className="header-container">
+        <Link to="/" className="logo">
+          Менеджер задач
+        </Link>
+        
+        <nav className="nav">
+          {token ? (
+            <>
+              <span className="user-email">Привет, {user?.email}</span>
+              <Link to="/" className="nav-link">Задачи</Link>
+              <Link to="/profile" className="nav-link">Профиль</Link>
+              <button onClick={handleLogout} className="nav-button">
+                Выйти
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="nav-link">Войти</Link>
+              <Link to="/register" className="nav-link">Регистрация</Link>
+            </>
+          )}
+        </nav>
+      </div>
+    </header>
+  );
+};

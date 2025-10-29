@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import { AppProviders } from "./components/AppProviders";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { Header } from "./components/Header";
 import { TodoDashboard } from "./components/TodoDashboard";
 import { AppContainer, MainContainer } from "./styles/AppStyles";
 import LoginPage from "./pages/LoginPages";
@@ -11,8 +12,9 @@ import NotFoundPage from "./pages/NotFoundPage";
 export function AppContent() {
   return (
     <AppContainer>
+      <Header />
       <MainContainer>
-        <Routes >
+        <Routes>
           <Route
             path="/"
             element={

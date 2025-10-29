@@ -4,7 +4,7 @@ const path = require('path');
 const cors = require('cors');
 
 const app = express();
-const PORT = 3001;
+const PORT = 3002;
 const DB_FILE = path.join(__dirname, 'todos.json');
 
 app.use(cors());

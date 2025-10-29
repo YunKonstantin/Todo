@@ -8,11 +8,259 @@ export const GlobalStyle = createGlobalStyle<{
     font-family: "Inter", system-ui, sans-serif;
     background: ${({ $themeMode }) =>
       $themeMode === "light"
-        ? "linear-gradient(135deg, #e0f7fa, #ffffff)"
-        : "linear-gradient(135deg, #1e1e2f, #121212)"};
+        ? "rgba(255, 255, 255, 0.7))"
+        : "rgba(40, 40, 40, 0.7)"};
     color: ${({ $themeMode }) => ($themeMode === "light" ? "#111" : "#f1f1f1")};
     transition: background 0.4s ease, color 0.3s ease;
     min-height: 100vh;
+  }
+
+  .auth-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    padding: 2rem;
+  }
+
+  .auth-form,
+  .password-form {
+    background: ${({ $themeMode }) =>
+      $themeMode === "light" ? "white" : "#2d2d2d"};
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    border: 1px solid ${({ $themeMode }) =>
+      $themeMode === "light" ? "#ddd" : "#444"};
+  }
+
+  .auth-form h2,
+  .password-form h3 {
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: ${({ $themeMode }) => ($themeMode === "light" ? "#333" : "#f1f1f1")};
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: ${({ $themeMode }) => ($themeMode === "light" ? "#333" : "#f1f1f1")};
+  }
+
+  .form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid ${({ $themeMode }) =>
+      $themeMode === "light" ? "#ddd" : "#555"};
+    border-radius: 4px;
+    font-size: 1rem;
+    background: ${({ $themeMode }) =>
+      $themeMode === "light" ? "white" : "#333"};
+    color: ${({ $themeMode }) => ($themeMode === "light" ? "#333" : "#f1f1f1")};
+  }
+
+  .form-group input:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+  }
+
+  .submit-button {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 1rem;
+  }
+
+  .submit-button:hover:not(:disabled) {
+    background-color: #357ae8;
+  }
+
+  .submit-button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+  }
+
+  .error-message {
+    background-color: #fdeded;
+    color: #e74c3c;
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    border: 1px solid #f5c6c6;
+  }
+
+  .success-message {
+    background-color: #edf7ed;
+    color: #27ae60;
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    border: 1px solid #c6e7c6;
+  }
+
+  .field-error {
+    color: #e74c3c;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
+  }
+
+  /* Стили для профиля */
+  .profile-page {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .profile-info {
+    background: ${({ $themeMode }) =>
+      $themeMode === "light" ? "white" : "#2d2d2d"};
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+    border: 1px solid ${({ $themeMode }) =>
+      $themeMode === "light" ? "#ddd" : "#444"};
+  }
+
+  .info-item {
+    margin-bottom: 1rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid ${({ $themeMode }) =>
+      $themeMode === "light" ? "#ddd" : "#444"};
+    color: ${({ $themeMode }) => ($themeMode === "light" ? "#333" : "#f1f1f1")};
+  }
+
+  .info-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+
+  
+  .header {
+  background: ${({ $themeMode }) =>
+    $themeMode === "light"
+      ? "rgba(255, 255, 255, 0.7)"
+      : "rgba(40, 40, 40, 0.7)"};  
+  border-bottom: 1px solid ${({ $themeMode }) =>
+    $themeMode === "light" ? "#ddd" : "#333"};
+  padding: 1rem 0;
+  backdrop-filter: blur(10px); 
+  border-radius: 10px;
+}
+
+  .header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #4a90e2;
+    text-decoration: none;
+  }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .nav-link {
+    color: ${({ $themeMode }) => ($themeMode === "light" ? "#333" : "#f1f1f1")};
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+  }
+
+  .nav-link:hover {
+    background-color: ${({ $themeMode }) =>
+      $themeMode === "light" ? "#f5f5f5" : "#333"};
+  }
+
+  .nav-button {
+    background: none;
+    border: 1px solid ${({ $themeMode }) =>
+      $themeMode === "light" ? "#ddd" : "#555"};
+    color: ${({ $themeMode }) => ($themeMode === "light" ? "#333" : "#f1f1f1")};
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  .nav-button:hover {
+    background-color: ${({ $themeMode }) =>
+      $themeMode === "light" ? "#f5f5f5" : "#333"};
+  }
+
+  .user-email {
+    color: ${({ $themeMode }) => ($themeMode === "light" ? "#6c757d" : "#aaa")};
+    margin-right: 1rem;
+  }
+
+  .theme-toggle {
+    background: none;
+    border: 1px solid ${({ $themeMode }) =>
+      $themeMode === "light" ? "#ddd" : "#555"};
+    padding: 0.5rem;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: transform 0.2s;
+  }
+
+  .theme-toggle:hover {
+    transform: scale(1.1);
+  }
+
+ 
+  .error-boundary {
+    padding: 2rem;
+    text-align: center;
+    background: #fdeded;
+    border: 1px solid #f5c6c6;
+    border-radius: 8px;
+    margin: 2rem;
+  }
+
+  .error-boundary h2 {
+    color: #e74c3c;
+    margin-bottom: 1rem;
+  }
+
+  .error-boundary details {
+    margin-bottom: 1rem;
+    color: #6c757d;
+  }
+
+  .error-boundary button {
+    background: #4a90e2;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
   }
 `;
 
@@ -21,7 +269,7 @@ export const AppContainer = styled.div`
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  padding: 20px;
+ 
 `;
 
 export const MainContainer = styled.div`
@@ -30,6 +278,7 @@ export const MainContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 20px;
 `;
 
 export const fadeIn = keyframes`

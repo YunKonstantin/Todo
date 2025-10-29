@@ -89,22 +89,40 @@ export const Pagination = ({
     const visiblePages = [];
     const showPages = 5;
 
-    let start = Math.max(1, currentPage - 2);
-    let end = Math.min(totalPages, start + showPages - 1);
+    if (totalPages <= showPages) {
+      // Если страниц меньше или равно 5, показываем все
+      for (let i = 1; i <= totalPages; i++) {
+        visiblePages.push(i);
+      }
+    } else {
+      // Всегда показываем 5 страниц вокруг текущей
+      let start = Math.max(1, currentPage - 2);
+      let end = Math.min(totalPages, currentPage + 2);
 
-    if (end - start + 1 < showPages) {
-      start = Math.max(1, end - showPages + 1);
+      // Корректируем если near the edges
+      if (currentPage <= 3) {
+        start = 1;
+        end = 5;
+      } else if (currentPage >= totalPages - 2) {
+        start = totalPages - 4;
+        end = totalPages;
+      }
+
+      for (let i = start; i <= end; i++) {
+        visiblePages.push(i);
+      }
     }
 
-    for (let i = start; i <= end; i++) {
-      visiblePages.push(i);
-    }
-   
     return visiblePages;
   };
 
   const visiblePages = getVisiblePages();
- console.log(visiblePages);
+
+  // Проверяем нужно ли показывать эллипсисы
+  const showLeftEllipsis = visiblePages[0] > 2;
+  const showRightEllipsis =
+    visiblePages[visiblePages.length - 1] < totalPages - 1;
+
   return (
     <PaginationContainer>
       <PageInfo $themeMode={theme}>
@@ -120,41 +138,45 @@ export const Pagination = ({
         ←
       </PageButton>
 
-      {visiblePages[0] > 1 && (
-        <>
-          <PageButton $themeMode={theme} onClick={() => onPageChange(1)}>
-            1
-          </PageButton>
-          {visiblePages[0] > 2 && <Ellipsis $themeMode={theme}>...</Ellipsis>}
-        </>
-      )}
+      {/* Первая страница */}
+      <PageButton
+        $themeMode={theme}
+        onClick={() => onPageChange(1)}
+        $active={currentPage === 1}
+      >
+        1
+      </PageButton>
 
-      {visiblePages.map((page) => (
-        <PageButton
-          key={page}
-          $themeMode={theme}
-          $active={page === currentPage}
-          onClick={() => onPageChange(page)}
-          aria-label={`Страница ${page}`}
-          aria-current={page === currentPage ? "page" : undefined}
-        >
-          {page}
-        </PageButton>
-      ))}
+      {/* Левый эллипсис */}
+      {showLeftEllipsis && <Ellipsis $themeMode={theme}>...</Ellipsis>}
 
-      {visiblePages[visiblePages.length - 1] < totalPages && (
-        <>
-          {visiblePages[visiblePages.length - 1] < totalPages - 1 && (
-            <Ellipsis $themeMode={theme}>...</Ellipsis>
-          )}
+      {/* Центральные страницы (исключая первую и последнюю если они уже показаны) */}
+      {visiblePages.map((page) => {
+        if (page === 1 || page === totalPages) return null;
+        return (
           <PageButton
+            key={page}
             $themeMode={theme}
-            onClick={() => onPageChange(totalPages)}
-            aria-label={`Последняя страница ${totalPages}`}
+            $active={page === currentPage}
+            onClick={() => onPageChange(page)}
           >
-            {totalPages}
+            {page}
           </PageButton>
-        </>
+        );
+      })}
+
+      {/* Правый эллипсис */}
+      {showRightEllipsis && <Ellipsis $themeMode={theme}>...</Ellipsis>}
+
+      {/* Последняя страница (если не первая) */}
+      {totalPages > 1 && (
+        <PageButton
+          $themeMode={theme}
+          onClick={() => onPageChange(totalPages)}
+          $active={currentPage === totalPages}
+        >
+          {totalPages}
+        </PageButton>
       )}
 
       <PageButton

@@ -4,6 +4,7 @@ import { store } from "../store";
 import { ThemeProvider, useTheme } from "../hooks/useTheme";
 import { GlobalStyle } from "../styles/AppStyles";
 import { BrowserRouter as Router } from "react-router-dom";
+import { ErrorBoundary } from "./Error";
 
 interface AppProvidersProps {
   children: ReactNode;
@@ -14,9 +15,10 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
     <Provider store={store}>
       <ThemeProvider>
         <Router basename="/Todo">
-          {" "}
-          <GlobalStyleWithTheme />
-          {children}
+          <ErrorBoundary>
+            <GlobalStyleWithTheme />
+            {children}
+          </ErrorBoundary>
         </Router>
       </ThemeProvider>
     </Provider>
