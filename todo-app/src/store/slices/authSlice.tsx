@@ -31,6 +31,40 @@ const initialState: AuthState = {
   error: null,
 };
 
+// Регистрация с автоматическим входом
+export const registerAndLogin = createAsyncThunk(
+  "auth/registerAndLogin",
+  async (userData: RegisterData, { rejectWithValue }) => {
+    try {
+      // 1. Регистрируем пользователя
+      const registerResponse = await authAPI.register(userData);
+      const { accessToken, refreshToken } = registerResponse.data;
+
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+
+      // 2. Автоматически логиним пользователя
+      const loginResponse = await authAPI.login({
+        email: userData.email,
+        password: userData.password,
+      });
+
+      const finalToken = loginResponse.data.accessToken;
+      const finalUser = loginResponse.data.user;
+
+      localStorage.setItem("accessToken", finalToken);
+      localStorage.setItem("refreshToken", loginResponse.data.refreshToken);
+
+      return { user: finalUser, token: finalToken };
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Ошибка регистрации"
+      );
+    }
+  }
+);
+
+// Обычная регистрация (если нужна отдельно)
 export const registerUser = createAsyncThunk(
   "auth/register",
   async (userData: RegisterData, { rejectWithValue }) => {
@@ -55,25 +89,24 @@ export const loginUser = createAsyncThunk(
   async (credentials: LoginData, { rejectWithValue }) => {
     try {
       // ВРЕМЕННО: мок для тестирования
-      console.log('Моковый вход для:', credentials.email);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      console.log("Моковый вход для:", credentials.email);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       const mockResponse = {
-        user: { 
-          id: 1, 
+        user: {
+          id: 1,
           email: credentials.email,
           age: 25,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         },
-        accessToken: 'mock-token-123',
-        refreshToken: 'mock-refresh-123'
+        accessToken: "mock-token-123",
+        refreshToken: "mock-refresh-123",
       };
-      
+
       localStorage.setItem("accessToken", mockResponse.accessToken);
       localStorage.setItem("refreshToken", mockResponse.refreshToken);
-      
+
       return { user: mockResponse.user, token: mockResponse.accessToken };
-      
     } catch (error: any) {
       return rejectWithValue("Ошибка входа");
     }
@@ -108,7 +141,6 @@ export const changePassword = createAsyncThunk(
   }
 );
 
-
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -130,7 +162,23 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Регистрация с автоматическим входом
+      .addCase(registerAndLogin.pending, (state) => {
+        state.status = AuthStatus.LOADING;
+        state.error = null;
+      })
+      .addCase(registerAndLogin.fulfilled, (state, action) => {
+        state.status = AuthStatus.IDLE;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.error = null;
+      })
+      .addCase(registerAndLogin.rejected, (state, action) => {
+        state.status = AuthStatus.FAILED;
+        state.error = action.payload as string;
+      })
 
+      // Обычная регистрация
       .addCase(registerUser.pending, (state) => {
         state.status = AuthStatus.LOADING;
         state.error = null;
@@ -146,6 +194,7 @@ const authSlice = createSlice({
         state.error = action.payload as string;
       })
 
+      // Логин
       .addCase(loginUser.pending, (state) => {
         state.status = AuthStatus.LOADING;
         state.error = null;

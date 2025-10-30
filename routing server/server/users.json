@@ -12,5 +12,19 @@
     "password": "$2a$10$Q15OvJYTA9TvGEvTCxdb2.nMcdTCCv3qDehnBQPqEzJAdew03/ee.",
     "age": 44,
     "createdAt": "2025-10-28T15:06:30.930Z"
+  },
+  {
+    "id": 1761825278762,
+    "email": "gvno@icloud.com",
+    "password": "$2a$10$yY/nT0PEjurn3gJvgb4NVeR72L9AnnGDlRnq/b4W9XhJ3TXrn//YW",
+    "age": 122,
+    "createdAt": "2025-10-30T11:54:38.762Z"
+  },
+  {
+    "id": 1761825348848,
+    "email": "walera@mail.ru",
+    "password": "$2a$10$ZgZ.wW5wXJ.bW55beL4KA.7NP2m1NbhRYBiScNE5wpxAz1J5nL6f6",
+    "age": 34,
+    "createdAt": "2025-10-30T11:55:48.848Z"
   }
 ]
