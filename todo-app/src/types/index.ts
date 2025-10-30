@@ -1,6 +1,7 @@
 export interface Todo {
   id: number;
-  text: string;
+  text?: string;
+  title?:string;
   completed: boolean;
   userId:number;
   createdAt: string;

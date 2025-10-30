@@ -11,6 +11,7 @@ import {
   FilterStatus,
   SortOrder,
 } from "../../types";
+import { todosAPI } from "../../services/formApi";
 
 interface FetchTodosParams {
   page: number;
@@ -77,96 +78,42 @@ interface TodoState {
 
 const initialState: TodoState = loadInitialState();
 
-// ИЗМЕНИТЬ: fetchTodos принимает userId
 export const fetchTodos = createAsyncThunk(
   "todos/fetchTodos",
   async ({ page, limit, userId }: FetchTodosParams, { rejectWithValue }) => {
     try {
-      // ВРЕМЕННО: используем моки с привязкой к пользователю
-      console.log('Загрузка задач для пользователя:', userId);
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const mockTodos: Todo[] = [
-        { 
-          id: 1, 
-          text: 'Личная задача пользователя ' + userId, 
-          completed: false, 
-          userId, 
-          createdAt: new Date().toISOString() 
-        },
-        { 
-          id: 2, 
-          text: 'Еще задача пользователя ' + userId, 
-          completed: true, 
-          userId, 
-          createdAt: new Date().toISOString() 
-        },
-        { 
-          id: 3, 
-          text: 'Важная задача пользователя ' + userId, 
-          completed: false, 
-          userId, 
-          createdAt: new Date().toISOString() 
-        },
-      ];
-      
-      // Фильтруем задачи по userId (в реальном API это делает сервер)
-      const userTodos = mockTodos.filter(todo => todo.userId === userId);
-      
-      const response: TodosResponse = {
-        data: userTodos,
+      // РЕАЛЬНЫЙ API вызов
+      const response = await todosAPI.getTodos(userId);
+      return {
+        data: response.data,
         page,
         limit,
-        total: userTodos.length,
-        totalPages: Math.ceil(userTodos.length / limit),
+        total: response.data.length,
+        totalPages: Math.ceil(response.data.length / limit),
       };
-      
-      return response;
-      
-      // КОГДА API БУДЕТ РАБОТАТЬ, РАСКОММЕНТИРУЙ:
-      // const response = await todosAPI.getTodos(userId);
-      // return {
-      //   data: response.data,
-      //   page,
-      //   limit,
-      //   total: response.data.length,
-      //   totalPages: Math.ceil(response.data.length / limit),
-      // };
     } catch (error: any) {
-      return rejectWithValue(error.message || "ошибка");
+      return rejectWithValue(error.message || "ошибка загрузки задач");
     }
   }
 );
 
-// ИЗМЕНИТЬ: addTodo принимает объект с title и userId
 export const addTodo = createAsyncThunk(
   "todos/addTodo",
   async ({ text, userId }: AddTodoParams, { rejectWithValue }) => {
     try {
-      // ВРЕМЕННО: мок создания задачи
-      console.log('Создание задачи для пользователя:', userId);
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      const newTodo: Todo = {
-        id: Date.now(),
-        text,
-        completed: false,
+      // РЕАЛЬНЫЙ API вызов
+      const response = await todosAPI.createTodo({ 
+        title:text, 
         userId,
-        createdAt: new Date().toISOString(),
-      };
-      
-      return newTodo;
-      
-      // КОГДА API БУДЕТ РАБОТАТЬ, РАСКОММЕНТИРУЙ:
-      // const response = await todosAPI.createTodo({ title, userId });
-      // return response.data;
+        completed: false 
+      });
+      return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.message || "ошибка добавления");
+      return rejectWithValue(error.message || "ошибка добавления задачи");
     }
   }
 );
 
-// Остальные actions (toggleTodo, updateTodo, deleteTodo) остаются без изменений
 export const toggleTodo = createAsyncThunk(
   "todos/toggleTodo",
   async (
@@ -174,18 +121,11 @@ export const toggleTodo = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      // Временный мок
-      await new Promise(resolve => setTimeout(resolve, 200));
-      const updatedTodo: Todo = {
-        id,
-        text: 'Обновленная задача',
-        completed,
-        userId: 1, // временно
-        createdAt: new Date().toISOString(),
-      };
-      return updatedTodo;
+      // РЕАЛЬНЫЙ API вызов
+      const response = await todosAPI.updateTodo(id, { completed });
+      return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.message || "ошибка переключения ");
+      return rejectWithValue(error.message || "ошибка переключения задачи");
     }
   }
 );
@@ -194,18 +134,11 @@ export const updateTodo = createAsyncThunk(
   "todos/updateTodo",
   async ({ id, text }: { id: number; text: string }, { rejectWithValue }) => {
     try {
-      // Временный мок
-      await new Promise(resolve => setTimeout(resolve, 200));
-      const updatedTodo: Todo = {
-        id,
-        text: text,
-        completed: false,
-        userId: 1, // временно
-        createdAt: new Date().toISOString(),
-      };
-      return updatedTodo;
+      // РЕАЛЬНЫЙ API вызов
+      const response = await todosAPI.updateTodo(id, { title:text });
+      return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.message || "ошибка обновления");
+      return rejectWithValue(error.message || "ошибка обновления задачи");
     }
   }
 );
@@ -214,11 +147,11 @@ export const deleteTodo = createAsyncThunk(
   "todos/deleteTodo",
   async (id: number, { rejectWithValue }) => {
     try {
-      // Временный мок
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // РЕАЛЬНЫЙ API вызов
+      await todosAPI.deleteTodo(id);
       return id;
     } catch (error: any) {
-      return rejectWithValue(error.message || "оштбка удаления");
+      return rejectWithValue(error.message || "ошибка удаления задачи");
     }
   }
 );

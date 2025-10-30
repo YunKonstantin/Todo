@@ -39,7 +39,7 @@ export interface ChangePasswordData {
 
 export interface Todo {
   id: number;
-  title: string;
+  text: string;
   completed: boolean;
   userId: number;
   createdAt: string;
