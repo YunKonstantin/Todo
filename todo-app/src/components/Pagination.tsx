@@ -90,16 +90,13 @@ export const Pagination = ({
     const showPages = 5;
 
     if (totalPages <= showPages) {
-      // Если страниц меньше или равно 5, показываем все
       for (let i = 1; i <= totalPages; i++) {
         visiblePages.push(i);
       }
     } else {
-      // Всегда показываем 5 страниц вокруг текущей
       let start = Math.max(1, currentPage - 2);
       let end = Math.min(totalPages, currentPage + 2);
 
-      // Корректируем если near the edges
       if (currentPage <= 3) {
         start = 1;
         end = 5;
@@ -118,7 +115,6 @@ export const Pagination = ({
 
   const visiblePages = getVisiblePages();
 
-  // Проверяем нужно ли показывать эллипсисы
   const showLeftEllipsis = visiblePages[0] > 2;
   const showRightEllipsis =
     visiblePages[visiblePages.length - 1] < totalPages - 1;
@@ -138,7 +134,6 @@ export const Pagination = ({
         ←
       </PageButton>
 
-      {/* Первая страница */}
       <PageButton
         $themeMode={theme}
         onClick={() => onPageChange(1)}
@@ -147,10 +142,8 @@ export const Pagination = ({
         1
       </PageButton>
 
-      {/* Левый эллипсис */}
       {showLeftEllipsis && <Ellipsis $themeMode={theme}>...</Ellipsis>}
 
-      {/* Центральные страницы (исключая первую и последнюю если они уже показаны) */}
       {visiblePages.map((page) => {
         if (page === 1 || page === totalPages) return null;
         return (
@@ -165,10 +158,8 @@ export const Pagination = ({
         );
       })}
 
-      {/* Правый эллипсис */}
       {showRightEllipsis && <Ellipsis $themeMode={theme}>...</Ellipsis>}
 
-      {/* Последняя страница (если не первая) */}
       {totalPages > 1 && (
         <PageButton
           $themeMode={theme}
