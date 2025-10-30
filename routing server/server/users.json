@@ -26,5 +26,12 @@
     "password": "$2a$10$ZgZ.wW5wXJ.bW55beL4KA.7NP2m1NbhRYBiScNE5wpxAz1J5nL6f6",
     "age": 34,
     "createdAt": "2025-10-30T11:55:48.848Z"
+  },
+  {
+    "id": 1761826553804,
+    "email": "wdads@fasfas.ru",
+    "password": "$2a$10$8ifqkh8IjpGCS2Xum5baK.5EB8VWQuvOro5cEvv8sXWJuMi8m2Ab2",
+    "age": 32,
+    "createdAt": "2025-10-30T12:15:53.804Z"
   }
 ]

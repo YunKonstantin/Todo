@@ -4,141 +4,81 @@ import {
   type PayloadAction,
 } from "@reduxjs/toolkit";
 import {
-  type FilterStatusType,
-  type SortOrderType,
+  todosAPI,
   type Todo,
-  type TodosResponse,
-  FilterStatus,
-  SortOrder,
-} from "../../types";
-import { todosAPI } from "../../services/formApi";
+  type CreateTodoData,
+} from "../../services/formApi";
 
-interface FetchTodosParams {
-  page: number;
-  limit: number;
-  userId: number; 
+export enum TodoStatus {
+  IDLE = "idle",
+  LOADING = "loading",
+  FAILED = "failed",
 }
 
-interface AddTodoParams {
-  text: string;
-  userId: number; 
-}
-
-const loadInitialState = (): TodoState => {
-  try {
-    const saved = localStorage.getItem("todos_state");
-    if (saved) {
-      const parsedState = JSON.parse(saved);
-      return parsedState;
-    }
-  } catch (error) {
-    console.error("ошибка в localStorage! :", error);
-  }
-
-  return {
-    items: [],
-    loading: false,
-    error: null,
-    pagination: {
-      currentPage: 1,
-      totalPages: 1,
-      totalItems: 0,
-      itemsPerPage: 5,
-    },
-    filters: {
-      status: FilterStatus.ALL,
-      sortOrder: SortOrder.NEWEST,
-    },
-  };
-};
-
-const saveState = (state: TodoState) => {
-  try {
-    localStorage.setItem("todos_state", JSON.stringify(state));
-  } catch (error) {
-    console.error("ошибка сохранения", error);
-  }
-};
-
-interface TodoState {
-  items: Todo[];
-  loading: boolean;
+export interface TodoState {
+  todos: Todo[];
+  status: TodoStatus;
   error: string | null;
-  pagination: {
-    currentPage: number;
-    totalPages: number;
-    totalItems: number;
-    itemsPerPage: number;
-  };
-  filters: {
-    status: FilterStatusType;
-    sortOrder: SortOrderType;
-  };
 }
 
-const initialState: TodoState = loadInitialState();
+const initialState: TodoState = {
+  todos: [],
+  status: TodoStatus.IDLE,
+  error: null,
+};
 
 export const fetchTodos = createAsyncThunk(
   "todos/fetchTodos",
-  async ({ page, limit, userId }: FetchTodosParams, { rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      // РЕАЛЬНЫЙ API вызов
-      const response = await todosAPI.getTodos(userId);
-      return {
-        data: response.data,
-        page,
-        limit,
-        total: response.data.length,
-        totalPages: Math.ceil(response.data.length / limit),
-      };
-    } catch (error: any) {
-      return rejectWithValue(error.message || "ошибка загрузки задач");
-    }
-  }
-);
-
-export const addTodo = createAsyncThunk(
-  "todos/addTodo",
-  async ({ text, userId }: AddTodoParams, { rejectWithValue }) => {
-    try {
-      // РЕАЛЬНЫЙ API вызов
-      const response = await todosAPI.createTodo({ 
-        title:text, 
-        userId,
-        completed: false 
-      });
+      const response = await todosAPI.getTodos();
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.message || "ошибка добавления задачи");
+      return rejectWithValue(
+        error.response?.data?.message || "Ошибка загрузки задач"
+      );
     }
   }
 );
 
-export const toggleTodo = createAsyncThunk(
-  "todos/toggleTodo",
+export const createTodo = createAsyncThunk(
+  "todos/createTodo",
   async (
-    { id, completed }: { id: number; completed: boolean },
-    { rejectWithValue }
+    todoData: Omit<CreateTodoData, "userId">,
+    { rejectWithValue, getState }
   ) => {
     try {
-      // РЕАЛЬНЫЙ API вызов
-      const response = await todosAPI.updateTodo(id, { completed });
+      const state = getState() as any;
+      const userId = state.auth.user?.id || 1;
+
+      const data: CreateTodoData = {
+        ...todoData,
+        userId,
+      };
+
+      const response = await todosAPI.createTodo(data);
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.message || "ошибка переключения задачи");
+      return rejectWithValue(
+        error.response?.data?.message || "Ошибка создания задачи"
+      );
     }
   }
 );
 
 export const updateTodo = createAsyncThunk(
   "todos/updateTodo",
-  async ({ id, text }: { id: number; text: string }, { rejectWithValue }) => {
+  async (
+    { id, data }: { id: number; data: Partial<CreateTodoData> },
+    { rejectWithValue }
+  ) => {
     try {
-      // РЕАЛЬНЫЙ API вызов
-      const response = await todosAPI.updateTodo(id, { title:text });
+      const response = await todosAPI.updateTodo(id, data);
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.message || "ошибка обновления задачи");
+      return rejectWithValue(
+        error.response?.data?.message || "Ошибка обновления задачи"
+      );
     }
   }
 );
@@ -147,153 +87,195 @@ export const deleteTodo = createAsyncThunk(
   "todos/deleteTodo",
   async (id: number, { rejectWithValue }) => {
     try {
-      // РЕАЛЬНЫЙ API вызов
       await todosAPI.deleteTodo(id);
       return id;
     } catch (error: any) {
-      return rejectWithValue(error.message || "ошибка удаления задачи");
+      return rejectWithValue(
+        error.response?.data?.message || "Ошибка удаления задачи"
+      );
     }
   }
 );
 
-// Slice остается без изменений
-const todosSlice = createSlice({
+export const toggleTodo = createAsyncThunk(
+  "todos/toggleTodo",
+  async (id: number, { rejectWithValue }) => {
+    try {
+      const response = await todosAPI.toggleTodo(id);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Ошибка обновления задачи"
+      );
+    }
+  }
+);
+
+const todoSlice = createSlice({
   name: "todos",
   initialState,
   reducers: {
-    setFilter: (state, action: PayloadAction<FilterStatusType>) => {
-      state.filters.status = action.payload;
-      state.pagination.currentPage = 1;
-      saveState(state);
-    },
-    setSortOrder: (state, action: PayloadAction<SortOrderType>) => {
-      state.filters.sortOrder = action.payload;
-      saveState(state);
-    },
-    setPage: (state, action: PayloadAction<number>) => {
-      state.pagination.currentPage = action.payload;
-      saveState(state);
-    },
-    setItemsPerPage: (state, action: PayloadAction<number>) => {
-      state.pagination.itemsPerPage = action.payload;
-      state.pagination.currentPage = 1;
-      saveState(state);
-    },
     clearError: (state) => {
       state.error = null;
-      saveState(state);
+    },
+    resetStatus: (state) => {
+      state.status = TodoStatus.IDLE;
+    },
+    addTodo: (state, action: PayloadAction<Todo>) => {
+      if (!state.todos) {
+        state.todos = [];
+      }
+      state.todos.push(action.payload);
+    },
+    updateTodoLocal: (state, action: PayloadAction<Todo>) => {
+      if (!state.todos) {
+        state.todos = [];
+        return;
+      }
+      const index = state.todos.findIndex(
+        (todo) => todo.id === action.payload.id
+      );
+      if (index !== -1) {
+        state.todos[index] = action.payload;
+      }
+    },
+    removeTodo: (state, action: PayloadAction<number>) => {
+      if (!state.todos) {
+        state.todos = [];
+        return;
+      }
+      state.todos = state.todos.filter((todo) => todo.id !== action.payload);
+    },
+    toggleTodoLocal: (state, action: PayloadAction<number>) => {
+      if (!state.todos) {
+        state.todos = [];
+        return;
+      }
+      const todo = state.todos.find((todo) => todo.id === action.payload);
+      if (todo) {
+        todo.completed = !todo.completed;
+      }
+    },
+    resetTodos: (state) => {
+      state.todos = [];
+      state.status = TodoStatus.IDLE;
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
     builder
       .addCase(fetchTodos.pending, (state) => {
-        state.loading = true;
+        state.status = TodoStatus.LOADING;
         state.error = null;
       })
       .addCase(fetchTodos.fulfilled, (state, action) => {
-        state.loading = false;
-        const payload = action.payload as TodosResponse;
-
-        state.items = Array.isArray(payload.data) ? payload.data : [];
-        state.pagination = {
-          currentPage: payload.page,
-          totalPages: payload.totalPages,
-          totalItems: payload.total,
-          itemsPerPage: payload.limit,
-        };
-        saveState(state);
+        state.status = TodoStatus.IDLE;
+        state.todos = Array.isArray(action.payload) ? action.payload : [];
+        state.error = null;
       })
       .addCase(fetchTodos.rejected, (state, action) => {
-        state.loading = false;
-        state.error =
-          (action.payload as string) ||
-          action.error.message ||
-          "ошибка запроса";
-      })
-
-      .addCase(addTodo.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(addTodo.fulfilled, (state, action) => {
-        state.loading = false;
-        state.items.push(action.payload as Todo);
-        state.pagination.totalItems += 1;
-        saveState(state);
-      })
-      .addCase(addTodo.rejected, (state, action) => {
-        state.loading = false;
-        state.error =
-          (action.payload as string) ||
-          action.error.message ||
-          "ошибка обновления";
-        saveState(state);
-      })
-
-      .addCase(toggleTodo.fulfilled, (state, action) => {
-        if (!Array.isArray(state.items)) {
-          state.items = [];
+        state.status = TodoStatus.FAILED;
+        state.error = action.payload as string;
+        if (!state.todos) {
+          state.todos = [];
         }
-        const payload = action.payload as Todo;
-        const index = state.items.findIndex((todo) => todo.id === payload.id);
-        if (index !== -1) {
-          state.items[index] = payload;
-        }
-        saveState(state);
-      })
-      .addCase(toggleTodo.rejected, (state, action) => {
-        state.error =
-          (action.payload as string) ||
-          action.error.message ||
-          "ошибка переключения";
-        saveState(state);
       })
 
+      .addCase(createTodo.pending, (state) => {
+        state.status = TodoStatus.LOADING;
+        state.error = null;
+      })
+      .addCase(createTodo.fulfilled, (state, action) => {
+        state.status = TodoStatus.IDLE;
+        if (!Array.isArray(state.todos)) {
+          state.todos = [];
+        }
+        state.todos.push(action.payload);
+        state.error = null;
+      })
+      .addCase(createTodo.rejected, (state, action) => {
+        state.status = TodoStatus.FAILED;
+        state.error = action.payload as string;
+
+        if (!Array.isArray(state.todos)) {
+          state.todos = [];
+        }
+      })
+
+      .addCase(updateTodo.pending, (state) => {
+        state.status = TodoStatus.LOADING;
+        state.error = null;
+      })
       .addCase(updateTodo.fulfilled, (state, action) => {
-        if (!Array.isArray(state.items)) {
-          state.items = [];
+        state.status = TodoStatus.IDLE;
+        if (!Array.isArray(state.todos)) {
+          state.todos = [];
+          return;
         }
-        const index = state.items.findIndex(
+        const index = state.todos.findIndex(
           (todo) => todo.id === action.payload.id
         );
         if (index !== -1) {
-          state.items[index] = action.payload;
+          state.todos[index] = action.payload;
         }
-        saveState(state);
+        state.error = null;
       })
       .addCase(updateTodo.rejected, (state, action) => {
-        state.error =
-          (action.payload as string) ||
-          action.error.message ||
-          "ошибка обновления";
-        saveState(state);
+        state.status = TodoStatus.FAILED;
+        state.error = action.payload as string;
+      })
+
+      .addCase(deleteTodo.pending, (state) => {
+        state.status = TodoStatus.LOADING;
+        state.error = null;
       })
       .addCase(deleteTodo.fulfilled, (state, action) => {
-        if (!Array.isArray(state.items)) {
-          state.items = [];
+        state.status = TodoStatus.IDLE;
+        if (!Array.isArray(state.todos)) {
+          state.todos = [];
+          return;
         }
-        state.items = state.items.filter((todo) => todo.id !== action.payload);
-        state.pagination.totalItems = Math.max(
-          0,
-          state.pagination.totalItems - 1
-        );
-
-        const itemsOnCurrentPage = state.items.length;
-        if (itemsOnCurrentPage === 0 && state.pagination.currentPage > 1) {
-          state.pagination.currentPage = state.pagination.currentPage - 1;
-        }
-
-        saveState(state);
+        state.todos = state.todos.filter((todo) => todo.id !== action.payload);
+        state.error = null;
       })
       .addCase(deleteTodo.rejected, (state, action) => {
-        state.error =
-          (action.payload as string) ||
-          action.error.message ||
-          "ошибка удаления";
-        saveState(state);
+        state.status = TodoStatus.FAILED;
+        state.error = action.payload as string;
+      })
+
+      .addCase(toggleTodo.pending, (state) => {
+        state.status = TodoStatus.LOADING;
+        state.error = null;
+      })
+      .addCase(toggleTodo.fulfilled, (state, action) => {
+        state.status = TodoStatus.IDLE;
+        if (!Array.isArray(state.todos)) {
+          state.todos = [];
+          return;
+        }
+        const index = state.todos.findIndex(
+          (todo) => todo.id === action.payload.id
+        );
+        if (index !== -1) {
+          state.todos[index] = action.payload;
+        }
+        state.error = null;
+      })
+      .addCase(toggleTodo.rejected, (state, action) => {
+        state.status = TodoStatus.FAILED;
+        state.error = action.payload as string;
       });
   },
 });
 
-export const { setFilter, setSortOrder, setPage, setItemsPerPage, clearError } =
-  todosSlice.actions;
-export default todosSlice.reducer;
+export const {
+  clearError,
+  resetStatus,
+  addTodo,
+  updateTodoLocal,
+  removeTodo,
+  toggleTodoLocal,
+  resetTodos,
+} = todoSlice.actions;
+
+export default todoSlice.reducer;
