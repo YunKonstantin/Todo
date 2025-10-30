@@ -2,6 +2,7 @@ export interface Todo {
   id: number;
   text: string;
   completed: boolean;
+  userId:number;
   createdAt: string;
 }
 
@@ -16,6 +17,7 @@ export interface TodosResponse {
 export interface CreateTodoRequest {
   text: string;
   completed?: boolean;
+  userId: number;
 }
 
 export interface UpdateTodoRequest {

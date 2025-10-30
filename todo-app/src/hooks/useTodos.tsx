@@ -24,24 +24,42 @@ export const useTodos = () => {
     filters,
   } = useAppSelector((state) => state.todos);
 
+  const { user } = useAppSelector((state) => state.auth);
   const [localLoading, setLocalLoading] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchTodos());
+    if (user) {
+      dispatch(
+        fetchTodos({
+          page: pagination.currentPage,
+          limit: pagination.itemsPerPage,
+          userId: user.id,
+        })
+      );
+    }
   }, [
-    dispatch,  
+    dispatch,
     pagination.currentPage,
     pagination.itemsPerPage,
     filters.status,
     filters.sortOrder,
+    user,
   ]);
 
   const handleAddTodoWithLoading = useCallback(
     async (text: string) => {
+      if (!user) return;
+
       setLocalLoading(true);
       try {
-        await dispatch(addTodo(text)).unwrap();
-        dispatch(fetchTodos());
+        await dispatch(addTodo({ text: text, userId: user.id })).unwrap(); // ← text вместо title
+        dispatch(
+          fetchTodos({
+            page: pagination.currentPage,
+            limit: pagination.itemsPerPage,
+            userId: user.id,
+          })
+        );
       } catch (error) {
         console.error("Ошибка добавления", error);
         throw error;
@@ -49,43 +67,67 @@ export const useTodos = () => {
         setLocalLoading(false);
       }
     },
-    [dispatch]
+    [dispatch, user, pagination.currentPage, pagination.itemsPerPage]
   );
 
   const handleToggleTodo = useCallback(
     async (id: number, completed: boolean) => {
       try {
         await dispatch(toggleTodo({ id, completed })).unwrap();
-        dispatch(fetchTodos());
+        if (user) {
+          dispatch(
+            fetchTodos({
+              page: pagination.currentPage,
+              limit: pagination.itemsPerPage,
+              userId: user.id,
+            })
+          );
+        }
       } catch (error) {
         console.error("ОШИБКА ПЕРЕКЛЮЧЕНИЯ", error);
       }
     },
-    [dispatch]
+    [dispatch, user, pagination.currentPage, pagination.itemsPerPage]
   );
 
   const handleDeleteTodo = useCallback(
     async (id: number) => {
       try {
         await dispatch(deleteTodo(id)).unwrap();
-        dispatch(fetchTodos());
+        if (user) {
+          dispatch(
+            fetchTodos({
+              page: pagination.currentPage,
+              limit: pagination.itemsPerPage,
+              userId: user.id,
+            })
+          );
+        }
       } catch (error) {
         console.error("ОШИБКА УДАЛЕНИЯ", error);
       }
     },
-    [dispatch]
+    [dispatch, user, pagination.currentPage, pagination.itemsPerPage]
   );
 
   const handleEditTodo = useCallback(
     async (id: number, text: string) => {
       try {
         await dispatch(updateTodo({ id, text })).unwrap();
-        dispatch(fetchTodos());
+        if (user) {
+          dispatch(
+            fetchTodos({
+              page: pagination.currentPage,
+              limit: pagination.itemsPerPage,
+              userId: user.id,
+            })
+          );
+        }
       } catch (error) {
         console.error("Ошибка РЕДАКТИРОВАНИЯ", error);
       }
     },
-    [dispatch]
+    [dispatch, user, pagination.currentPage, pagination.itemsPerPage]
   );
 
   const handlePageChange = useCallback(
