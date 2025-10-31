@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import { AppProviders } from "./components/AppProviders";
-import { ProtectedRoute } from "./components/ProtectedRoute";
+import  ProtectedRoute  from "./components/ProtectedRoute";
 import { Header } from "./components/Header";
 import { TodoDashboard } from "./components/TodoDashboard";
 import { AppContainer, MainContainer } from "./styles/AppStyles";

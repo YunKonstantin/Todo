@@ -15,18 +15,39 @@ export enum TodoStatus {
   FAILED = "failed",
 }
 
+// Используем другие имена для типов чтобы избежать конфликта
+export type TodoFilterStatus = "all" | "active" | "completed";
+export type TodoSortOrder = "newest" | "oldest";
+
 export interface TodoState {
   todos: Todo[];
   status: TodoStatus;
   error: string | null;
+  filters: {
+    status: TodoFilterStatus;
+    sortOrder: TodoSortOrder;
+  };
+  pagination: {
+    itemsPerPage: number;
+    currentPage: number;
+  };
 }
 
 const initialState: TodoState = {
   todos: [],
   status: TodoStatus.IDLE,
   error: null,
+  filters: {
+    status: "all",
+    sortOrder: "newest",
+  },
+  pagination: {
+    itemsPerPage: 10,
+    currentPage: 1,
+  },
 };
 
+// Ваши существующие createAsyncThunk остаются без изменений
 export const fetchTodos = createAsyncThunk(
   "todos/fetchTodos",
   async (_, { rejectWithValue }) => {
@@ -161,6 +182,19 @@ const todoSlice = createSlice({
       state.status = TodoStatus.IDLE;
       state.error = null;
     },
+    // Новые actions для фильтров и пагинации
+    setFilter: (state, action: PayloadAction<TodoFilterStatus>) => {
+      state.filters.status = action.payload;
+    },
+    setSortOrder: (state, action: PayloadAction<TodoSortOrder>) => {
+      state.filters.sortOrder = action.payload;
+    },
+    setItemsPerPage: (state, action: PayloadAction<number>) => {
+      state.pagination.itemsPerPage = action.payload;
+    },
+    setCurrentPage: (state, action: PayloadAction<number>) => {
+      state.pagination.currentPage = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -196,7 +230,6 @@ const todoSlice = createSlice({
       .addCase(createTodo.rejected, (state, action) => {
         state.status = TodoStatus.FAILED;
         state.error = action.payload as string;
-
         if (!Array.isArray(state.todos)) {
           state.todos = [];
         }
@@ -276,6 +309,10 @@ export const {
   removeTodo,
   toggleTodoLocal,
   resetTodos,
+  setFilter,
+  setSortOrder,
+  setItemsPerPage,
+  setCurrentPage,
 } = todoSlice.actions;
 
 export default todoSlice.reducer;

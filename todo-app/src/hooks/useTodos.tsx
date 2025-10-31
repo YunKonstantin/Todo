@@ -35,9 +35,8 @@ export const useTodos = () => {
 
       setLocalLoading(true);
       try {
-        // Используем createTodo вместо addTodo
         await dispatch(createTodo({ text, completed: false })).unwrap();
-        // Перезагружаем список
+
         dispatch(fetchTodos());
       } catch (error) {
         console.error("Ошибка добавления", error);

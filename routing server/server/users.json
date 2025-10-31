@@ -33,5 +33,12 @@
     "password": "$2a$10$8ifqkh8IjpGCS2Xum5baK.5EB8VWQuvOro5cEvv8sXWJuMi8m2Ab2",
     "age": 32,
     "createdAt": "2025-10-30T12:15:53.804Z"
+  },
+  {
+    "id": 1761916555946,
+    "email": "pda@icloud.com",
+    "password": "$2a$10$iIj9tQgfzCGCd1jsVjIyheYzQRuOlswIt7qM1UddEKfDVIGMk2rLO",
+    "age": 21,
+    "createdAt": "2025-10-31T13:15:55.946Z"
   }
 ]
