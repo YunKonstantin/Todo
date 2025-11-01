@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../../store/slices/authSlice";
@@ -7,7 +7,7 @@ import type { AppDispatch, RootState } from "../../store";
 export const LoginForm = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { status, error, user } = useSelector((state: RootState) => state.auth); // Добавьте user
+  const { status, error } = useSelector((state: RootState) => state.auth);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -19,17 +19,7 @@ export const LoginForm = () => {
     password: "",
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Добавьте useEffect для перенаправления при успешном входе
-  useEffect(() => {
-    if (user) {
-      console.log("🔄 Перенаправление на главную страницу");
-      navigate("/", { replace: true });
-    }
-  }, [user, navigate]);
-
-  const validateForm = useCallback(() => {
+  const validateForm = () => {
     const newErrors = {
       email: "",
       password: "",
@@ -49,70 +39,26 @@ export const LoginForm = () => {
 
     setFormErrors(newErrors);
     return !newErrors.email && !newErrors.password;
-  }, [formData.email, formData.password]);
+  };
 
-  const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-      console.log("🔄 Начало обработки формы логина");
+    if (validateForm()) {
+      const result = await dispatch(loginUser(formData));
 
-      // Усиленная защита от множественных отправок
-      if (isSubmitting || status === "loading") {
-        console.log("⏸️ Форма уже отправляется, игнорируем");
-        return;
+      if (loginUser.fulfilled.match(result)) {
+        navigate("/");
       }
+    }
+  };
 
-      if (!validateForm()) {
-        console.log("❌ Валидация не пройдена");
-        return;
-      }
-
-      setIsSubmitting(true);
-      console.log("📤 Отправка данных логина:", formData);
-
-      try {
-        const result = await dispatch(loginUser(formData));
-        console.log("📥 Результат логина:", result);
-
-        // УБЕРИТЕ навигацию отсюда - она будет в useEffect
-        if (loginUser.fulfilled.match(result)) {
-          console.log("✅ Успешный вход, пользователь сохранен в store");
-          // navigate("/"); // УДАЛИТЕ ЭТУ СТРОКУ
-        } else {
-          console.log("❌ Ошибка входа в match:");
-        }
-      } catch (error) {
-        console.error("💥 Неожиданная ошибка:", error);
-      } finally {
-        setIsSubmitting(false);
-        console.log("🏁 Завершение обработки формы");
-      }
-    },
-    [dispatch, formData, isSubmitting, status, validateForm]
-  );
-
-  const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const { name, value } = e.target;
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-
-      // Очищаем ошибку при вводе
-      if (formErrors[name as keyof typeof formErrors]) {
-        setFormErrors((prev) => ({
-          ...prev,
-          [name]: "",
-        }));
-      }
-    },
-    [formErrors]
-  );
-
-  const isLoading = status === "loading" || isSubmitting;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
 
   return (
     <form onSubmit={handleSubmit} className="auth-form">
@@ -129,7 +75,6 @@ export const LoginForm = () => {
           value={formData.email}
           onChange={handleChange}
           required
-          disabled={isLoading}
         />
         {formErrors.email && (
           <span className="field-error">{formErrors.email}</span>
@@ -145,18 +90,20 @@ export const LoginForm = () => {
           value={formData.password}
           onChange={handleChange}
           required
-          disabled={isLoading}
         />
         {formErrors.password && (
           <span className="field-error">{formErrors.password}</span>
         )}
       </div>
 
-      <button type="submit" disabled={isLoading} className="submit-button">
-        {isLoading ? "Вход..." : "Войти"}
+      <button
+        type="submit"
+        disabled={status === "loading"}
+        className="submit-button"
+      >
+        {status === "loading" ? "Logging in..." : "Войти"}
       </button>
     </form>
   );
 };
-
-export default LoginForm;
+export default LoginForm

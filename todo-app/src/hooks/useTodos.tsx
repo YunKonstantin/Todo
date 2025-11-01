@@ -13,19 +13,17 @@ import type { FilterStatusType, SortOrderType } from "../types";
 export const useTodos = () => {
   const dispatch = useAppDispatch();
   const {
-    todos, // было items
-    status: loading, // было loading
+    todos,
+    status: loading,
     error,
-    // pagination и filters удалены, т.к. их нет в новом TodoState
   } = useAppSelector((state) => state.todos);
 
   const { user } = useAppSelector((state) => state.auth);
   const [localLoading, setLocalLoading] = useState(false);
 
-  // Упрощенный useEffect без пагинации и фильтров
   useEffect(() => {
     if (user) {
-      dispatch(fetchTodos()); // убраны параметры
+      dispatch(fetchTodos());
     }
   }, [dispatch, user]);
 
@@ -50,9 +48,8 @@ export const useTodos = () => {
 
   const handleToggleTodo = useCallback(
     async (id: number) => {
-      // убран параметр completed
       try {
-        await dispatch(toggleTodo(id)).unwrap(); // передаем только id
+        await dispatch(toggleTodo(id)).unwrap();
         if (user) {
           dispatch(fetchTodos());
         }
@@ -80,7 +77,6 @@ export const useTodos = () => {
   const handleEditTodo = useCallback(
     async (id: number, text: string) => {
       try {
-        // Используем правильную структуру для updateTodo
         await dispatch(
           updateTodo({
             id,
@@ -97,15 +93,12 @@ export const useTodos = () => {
     [dispatch, user]
   );
 
-  // Временные заглушки для пагинации и фильтров
   const handlePageChange = useCallback((page: number) => {
     console.log("Page change:", page);
-    // dispatch(setPage(page)); // убрано, т.к. setPage не экспортируется
   }, []);
 
   const handleItemsPerPageChange = useCallback((itemsPerPage: number) => {
     console.log("Items per page change:", itemsPerPage);
-    // dispatch(setItemsPerPage(itemsPerPage)); // убрано
   }, []);
 
   const handleClearError = useCallback(() => {
@@ -114,27 +107,23 @@ export const useTodos = () => {
 
   const handleSetFilter = useCallback((filter: FilterStatusType) => {
     console.log("Filter change:", filter);
-    // dispatch(setFilter(filter)); // убрано
   }, []);
 
   const handleSetSortOrder = useCallback((sortOrder: SortOrderType) => {
     console.log("Sort order change:", sortOrder);
-    // dispatch(setSortOrder(sortOrder)); // убрано
   }, []);
 
   return {
     todos,
-    loading: loading === "loading", // преобразуем статус в boolean
+    loading: loading === "loading",
     error,
     pagination: {
-      // временный объект для совместимости
       currentPage: 1,
       itemsPerPage: 10,
       totalItems: todos.length,
       totalPages: Math.ceil(todos.length / 10),
     },
     filters: {
-      // временный объект для совместимости
       status: "all",
       sortOrder: "newest",
     },

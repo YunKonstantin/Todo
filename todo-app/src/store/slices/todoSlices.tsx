@@ -47,7 +47,6 @@ const initialState: TodoState = {
   },
 };
 
-// Ваши существующие createAsyncThunk остаются без изменений
 export const fetchTodos = createAsyncThunk(
   "todos/fetchTodos",
   async (_, { rejectWithValue }) => {
@@ -204,7 +203,22 @@ const todoSlice = createSlice({
       })
       .addCase(fetchTodos.fulfilled, (state, action) => {
         state.status = TodoStatus.IDLE;
-        state.todos = Array.isArray(action.payload) ? action.payload : [];
+
+        const responseData = action.payload;
+
+        if (responseData && Array.isArray(responseData.data)) {
+          state.todos = responseData.data;
+          console.log("📋 Задачи загружены:", state.todos.length);
+        } else if (Array.isArray(responseData)) {
+          state.todos = responseData;
+        } else {
+          state.todos = [];
+          console.warn(
+            "⚠️ Неверная структура ответа от сервера:",
+            responseData
+          );
+        }
+
         state.error = null;
       })
       .addCase(fetchTodos.rejected, (state, action) => {
@@ -221,10 +235,32 @@ const todoSlice = createSlice({
       })
       .addCase(createTodo.fulfilled, (state, action) => {
         state.status = TodoStatus.IDLE;
+
         if (!Array.isArray(state.todos)) {
           state.todos = [];
         }
-        state.todos.push(action.payload);
+
+        let newTodo = action.payload;
+
+        if (action.payload && action.payload.data) {
+          newTodo = action.payload.data;
+        }
+
+        if (action.payload && action.payload.todo) {
+          newTodo = action.payload.todo;
+        }
+
+        if (
+          newTodo &&
+          typeof newTodo === "object" &&
+          newTodo.id !== undefined
+        ) {
+          state.todos.push(newTodo);
+          console.log("✅ Задача добавлена:", newTodo.text);
+        } else {
+          console.warn("⚠️ Неверная структура задачи:", newTodo);
+        }
+
         state.error = null;
       })
       .addCase(createTodo.rejected, (state, action) => {
