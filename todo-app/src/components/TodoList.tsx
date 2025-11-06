@@ -6,7 +6,7 @@ import EditTodo from "./EditTodo";
 
 interface TodoListProps {
   todos: Todo[];
-onToggle: (id: number, completed: boolean) => void;
+  onToggle: (id: number, completed: boolean) => void;
   onDelete: (id: number) => void;
   onEditSave: (id: number, text: string) => void;
 }
@@ -58,7 +58,7 @@ const TodoList = ({ todos, onToggle, onDelete, onEditSave }: TodoListProps) => {
           <TodoItem
             key={todo.id}
             todo={todo}
-          onToggle={(id) => onToggle(id, !todo.completed)}
+            onToggle={(id) => onToggle(id, !todo.completed)}
             onDelete={onDelete}
             onEdit={handleEdit}
           />

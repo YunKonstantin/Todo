@@ -7,15 +7,27 @@ import {
   deleteTodo,
   updateTodo,
   clearError,
+  setFilter,
+  setSortOrder,
+  setItemsPerPage,
+  setCurrentPage,
+  selectFilteredTodos,
+  selectPaginatedTodos,
+  type TodoFilterStatus,
+  type TodoSortOrder,
 } from "../store/slices/todoSlices";
-import type { FilterStatusType, SortOrderType } from "../types";
 
 export const useTodos = () => {
   const dispatch = useAppDispatch();
+
+  const filteredTodos = useAppSelector(selectFilteredTodos);
+  const paginatedTodos = useAppSelector(selectPaginatedTodos);
+
   const {
-    todos,
     status: loading,
     error,
+    filters,
+    pagination,
   } = useAppSelector((state) => state.todos);
 
   const { user } = useAppSelector((state) => state.auth);
@@ -34,7 +46,6 @@ export const useTodos = () => {
       setLocalLoading(true);
       try {
         await dispatch(createTodo({ text, completed: false })).unwrap();
-
         dispatch(fetchTodos());
       } catch (error) {
         console.error("Ошибка добавления", error);
@@ -55,6 +66,7 @@ export const useTodos = () => {
         }
       } catch (error) {
         console.error("ОШИБКА ПЕРЕКЛЮЧЕНИЯ", error);
+        throw error;
       }
     },
     [dispatch, user]
@@ -69,6 +81,7 @@ export const useTodos = () => {
         }
       } catch (error) {
         console.error("ОШИБКА УДАЛЕНИЯ", error);
+        throw error;
       }
     },
     [dispatch, user]
@@ -77,55 +90,79 @@ export const useTodos = () => {
   const handleEditTodo = useCallback(
     async (id: number, text: string) => {
       try {
+        if (!text || !text.trim()) {
+          throw new Error("Текст задачи не может быть пустым");
+        }
+
         await dispatch(
           updateTodo({
             id,
-            data: { text },
+            data: { text: text.trim() },
           })
         ).unwrap();
+
         if (user) {
           dispatch(fetchTodos());
         }
       } catch (error) {
         console.error("Ошибка РЕДАКТИРОВАНИЯ", error);
+        throw error;
       }
     },
     [dispatch, user]
   );
 
-  const handlePageChange = useCallback((page: number) => {
-    console.log("Page change:", page);
-  }, []);
+  const handlePageChange = useCallback(
+    (page: number) => {
+      dispatch(setCurrentPage(page));
+    },
+    [dispatch]
+  );
 
-  const handleItemsPerPageChange = useCallback((itemsPerPage: number) => {
-    console.log("Items per page change:", itemsPerPage);
-  }, []);
+  const handleItemsPerPageChange = useCallback(
+    (itemsPerPage: number) => {
+      dispatch(setItemsPerPage(itemsPerPage));
+      dispatch(setCurrentPage(1));
+    },
+    [dispatch]
+  );
+
+  const handleSetFilter = useCallback(
+    (filter: TodoFilterStatus) => {
+      dispatch(setFilter(filter));
+      dispatch(setCurrentPage(1));
+    },
+    [dispatch]
+  );
+
+  const handleSetSortOrder = useCallback(
+    (sortOrder: TodoSortOrder) => {
+      dispatch(setSortOrder(sortOrder));
+    },
+    [dispatch]
+  );
 
   const handleClearError = useCallback(() => {
     dispatch(clearError());
   }, [dispatch]);
 
-  const handleSetFilter = useCallback((filter: FilterStatusType) => {
-    console.log("Filter change:", filter);
-  }, []);
-
-  const handleSetSortOrder = useCallback((sortOrder: SortOrderType) => {
-    console.log("Sort order change:", sortOrder);
-  }, []);
-
   return {
-    todos,
+    todos: paginatedTodos,
+    allFilteredTodos: filteredTodos,
     loading: loading === "loading",
+    localLoading,
+
     error,
+
     pagination: {
-      currentPage: 1,
-      itemsPerPage: 10,
-      totalItems: todos.length,
-      totalPages: Math.ceil(todos.length / 10),
+      currentPage: pagination.currentPage,
+      itemsPerPage: pagination.itemsPerPage,
+      totalItems: filteredTodos.length,
+      totalPages: Math.ceil(filteredTodos.length / pagination.itemsPerPage),
     },
     filters: {
-      status: "all",
-      sortOrder: "newest",
+      status: filters.status,
+      sortOrder: filters.sortOrder,
     },
     handleAddTodo: handleAddTodoWithLoading,
     handleToggleTodo,
@@ -136,6 +173,5 @@ export const useTodos = () => {
     handleClearError,
     handleSetFilter,
     handleSetSortOrder,
-    localLoading,
   };
 };

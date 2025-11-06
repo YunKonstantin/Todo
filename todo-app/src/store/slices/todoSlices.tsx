@@ -8,6 +8,7 @@ import {
   type Todo,
   type CreateTodoData,
 } from "../../services/formApi";
+import { createSelector } from "@reduxjs/toolkit";
 
 export enum TodoStatus {
   IDLE = "idle",
@@ -15,7 +16,6 @@ export enum TodoStatus {
   FAILED = "failed",
 }
 
-// Используем другие имена для типов чтобы избежать конфликта
 export type TodoFilterStatus = "all" | "active" | "completed";
 export type TodoSortOrder = "newest" | "oldest";
 
@@ -181,7 +181,6 @@ const todoSlice = createSlice({
       state.status = TodoStatus.IDLE;
       state.error = null;
     },
-    // Новые actions для фильтров и пагинации
     setFilter: (state, action: PayloadAction<TodoFilterStatus>) => {
       state.filters.status = action.payload;
     },
@@ -208,15 +207,10 @@ const todoSlice = createSlice({
 
         if (responseData && Array.isArray(responseData.data)) {
           state.todos = responseData.data;
-          console.log("📋 Задачи загружены:", state.todos.length);
         } else if (Array.isArray(responseData)) {
           state.todos = responseData;
         } else {
           state.todos = [];
-          console.warn(
-            "⚠️ Неверная структура ответа от сервера:",
-            responseData
-          );
         }
 
         state.error = null;
@@ -256,11 +250,7 @@ const todoSlice = createSlice({
           newTodo.id !== undefined
         ) {
           state.todos.push(newTodo);
-          console.log("✅ Задача добавлена:", newTodo.text);
-        } else {
-          console.warn("⚠️ Неверная структура задачи:", newTodo);
         }
-
         state.error = null;
       })
       .addCase(createTodo.rejected, (state, action) => {
@@ -352,3 +342,51 @@ export const {
 } = todoSlice.actions;
 
 export default todoSlice.reducer;
+
+export const selectTodos = (state: { todos: TodoState }) => state.todos.todos;
+export const selectFilters = (state: { todos: TodoState }) =>
+  state.todos.filters;
+
+export const selectFilteredTodos = createSelector(
+  [
+    (state: { todos: TodoState }) => state.todos.todos,
+    (state: { todos: TodoState }) => state.todos.filters.status,
+  ],
+  (todos, status) => {
+    switch (status) {
+      case "active":
+        return todos.filter((todo) => !todo.completed);
+      case "completed":
+        return todos.filter((todo) => todo.completed);
+      default:
+        return todos;
+    }
+  }
+);
+
+export const selectSortedTodos = createSelector(
+  [
+    selectFilteredTodos,
+    (state: { todos: TodoState }) => state.todos.filters.sortOrder,
+  ],
+  (filteredTodos, sortOrder) => {
+    return [...filteredTodos].sort((a, b) => {
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
+      return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
+    });
+  }
+);
+
+export const selectPaginatedTodos = createSelector(
+  [
+    selectSortedTodos,
+    (state: { todos: TodoState }) => state.todos.pagination.currentPage,
+    (state: { todos: TodoState }) => state.todos.pagination.itemsPerPage,
+  ],
+  (sortedTodos, currentPage, itemsPerPage) => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return sortedTodos.slice(startIndex, endIndex);
+  }
+);

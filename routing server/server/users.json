@@ -40,5 +40,19 @@
     "password": "$2a$10$iIj9tQgfzCGCd1jsVjIyheYzQRuOlswIt7qM1UddEKfDVIGMk2rLO",
     "age": 21,
     "createdAt": "2025-10-31T13:15:55.946Z"
+  },
+  {
+    "id": 1762366064896,
+    "email": "marinaderezovvskaya@icloud.com",
+    "password": "$2a$10$c5JJBtU0V/VuHOjA18swZOZgZTwYvPiAaIgsmJYXzSZQwJ0QdmP26",
+    "age": null,
+    "createdAt": "2025-11-05T18:07:44.896Z"
+  },
+  {
+    "id": 1762370560341,
+    "email": "ak@icloud.com",
+    "password": "$2a$10$y6dsDFCZYkmMc.Z7uap4uuZj15OSnBr.3//Y9nd4wxLUsFqnsIkU2",
+    "age": 12,
+    "createdAt": "2025-11-05T19:22:40.341Z"
   }
 ]

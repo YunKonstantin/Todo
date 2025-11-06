@@ -76,31 +76,18 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    console.log(`🎯 ${config.method?.toUpperCase()} ${config.url}`, {
-      data: config.data,
-      headers: config.headers,
-    });
-
     return config;
   },
   (error) => {
-    console.error("❌ Ошибка в интерцепторе запроса:", error);
     return Promise.reject(error);
   }
 );
 
 api.interceptors.response.use(
   (response: AxiosResponse) => {
-    console.log(`✅ ${response.status} ${response.config.url}`, response.data);
     return response;
   },
   async (error) => {
-    console.error(`❌ Ошибка ${error.response?.status} ${error.config?.url}`, {
-      error: error.response?.data,
-      requestData: error.config?.data,
-      headers: error.config?.headers,
-    });
-
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -110,7 +97,6 @@ api.interceptors.response.use(
 
       if (refreshToken) {
         try {
-          console.log("🔄 Попытка обновления токена...");
           const response = await axios.post(`${API_URL}/auth/refresh`, {
             refreshToken,
           });
@@ -121,23 +107,16 @@ api.interceptors.response.use(
           store.dispatch(setToken(accessToken));
 
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-          console.log("✅ Токен успешно обновлен");
           return api(originalRequest);
         } catch (refreshError) {
-          console.error("❌ Ошибка обновления токена:", refreshError);
           store.dispatch(logoutUser());
           window.location.href = "/login";
           return Promise.reject(refreshError);
         }
       } else {
-        console.error("❌ Refresh token отсутствует");
         store.dispatch(logoutUser());
         window.location.href = "/login";
       }
-    }
-
-    if (error.response?.status === 400) {
-      console.error("🛑 Bad Request - неверные данные:", error.response?.data);
     }
 
     return Promise.reject(error);
@@ -163,7 +142,6 @@ export const authAPI = {
 };
 
 export const todosAPI = {
-  // ИСПРАВЛЕНО: правильный тип ответа
   getTodos: (): Promise<AxiosResponse<TodosResponse>> => api.get("/todos"),
 
   getTodosByUser: (userId: number): Promise<AxiosResponse<TodosResponse>> =>

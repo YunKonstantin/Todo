@@ -1,17 +1,16 @@
 import { useMemo } from "react";
 import type { Todo } from "../types";
-import type { FilterStatusType, SortOrderType } from "../types";
 
 interface UseTodoDataProps {
   todos: Todo[];
   filters: {
-    status: FilterStatusType;
-    sortOrder: SortOrderType;
+    status: string;
+    sortOrder: string;
   };
 }
 
 export const useTodoData = ({ todos, filters }: UseTodoDataProps) => {
-  const displayedTodos = useMemo(() => {//useCallback
+  const displayedTodos = useMemo(() => {
     const safeTodos = Array.isArray(todos) ? todos : [];
 
     let filteredTodos = safeTodos;
