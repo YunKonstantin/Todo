@@ -68,5 +68,26 @@
     "password": "$2a$10$Z9u0ofEx0Plt35ryZqM49.FUPAkXXN418DxHgpi0bFRTHi3lKKb/.",
     "age": null,
     "createdAt": "2025-11-11T18:17:12.250Z"
+  },
+  {
+    "id": 1762886755649,
+    "email": "21321@icloud.com",
+    "password": "$2a$10$u78K0.dg7jowbJIPSWMZqOaUr5QswvidrTAAZbXIXyGaoTav1U0Ki",
+    "age": null,
+    "createdAt": "2025-11-11T18:45:55.649Z"
+  },
+  {
+    "id": 1762887075401,
+    "email": "2132323@icloud.com",
+    "password": "$2a$10$ITuzVnV.aoFIkwqP3h4R8OeJWKSrJQeBatPF6vXIsuVLt5xDSvzOi",
+    "age": null,
+    "createdAt": "2025-11-11T18:51:15.401Z"
+  },
+  {
+    "id": 1762887176731,
+    "email": "123@mail.ru",
+    "password": "$2a$10$NmO5atku9g9AS.tJUSeso.dP5qeXarvQIgv03sAXgIo0d95cqy4KC",
+    "age": null,
+    "createdAt": "2025-11-11T18:52:56.731Z"
   }
 ]

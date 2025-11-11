@@ -14,6 +14,7 @@ export const GlobalStyle = createGlobalStyle<{
     transition: background 0.4s ease, color 0.3s ease;
     min-height: 100vh;
   }
+    
   .auth-page {
     display: flex;
     justify-content: center;
@@ -268,7 +269,6 @@ export const AppContainer = styled.div`
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
- 
 `;
 
 export const MainContainer = styled.div`
@@ -435,4 +435,3 @@ export const EmptyState = styled.div`
     font-size: 0.9rem;
   }
 `;
-
