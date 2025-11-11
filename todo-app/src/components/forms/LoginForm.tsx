@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../../store/slices/authSlice";
 import type { AppDispatch, RootState } from "../../store";
+import  PasswordInput  from "../InputPassword";
 
 export const LoginForm = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -83,13 +84,11 @@ export const LoginForm = () => {
 
       <div className="form-group">
         <label htmlFor="password">Пароль:</label>
-        <input
-          type="password"
+        <PasswordInput
           id="password"
           name="password"
           value={formData.password}
           onChange={handleChange}
-          required
         />
         {formErrors.password && (
           <span className="field-error">{formErrors.password}</span>
@@ -106,4 +105,5 @@ export const LoginForm = () => {
     </form>
   );
 };
-export default LoginForm
+
+export default LoginForm;

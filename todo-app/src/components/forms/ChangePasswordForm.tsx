@@ -1,60 +1,107 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { changePassword } from "../../store/slices/authSlice";
 import type { AppDispatch, RootState } from "../../store";
+import PasswordInput from "../InputPassword";
+
+interface FormData {
+  oldPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+interface FormErrors {
+  oldPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
 
 export const ChangePasswordForm = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { status, error } = useSelector((state: RootState) => state.auth);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     oldPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
 
-  const [formErrors, setFormErrors] = useState({
+  const [formErrors, setFormErrors] = useState<FormErrors>({
     oldPassword: "",
     newPassword: "",
     confirmPassword: "",
+  });
+
+  const [touched, setTouched] = useState({
+    oldPassword: false,
+    newPassword: false,
+    confirmPassword: false,
   });
 
   const [success, setSuccess] = useState(false);
 
-  const validateForm = () => {
-    const newErrors = {
-      oldPassword: "",
-      newPassword: "",
-      confirmPassword: "",
+  // Валидация отдельного поля
+  const validateField = useCallback((name: keyof FormData, value: string): string => {
+    switch (name) {
+      case "oldPassword":
+        if (!value.trim()) return "Текущий пароль обязателен";
+        return "";
+
+      case "newPassword":
+        if (!value.trim()) return "Новый пароль обязателен";
+        if (value.length < 6) return "Пароль должен быть не менее 6 символов";
+        if (value.length > 30) return "Пароль не может быть длиннее 30 символов";
+        if (value === formData.oldPassword) return "Новый пароль должен отличаться от текущего";
+        return "";
+
+      case "confirmPassword":
+        if (!value.trim()) return "Подтверждение пароля обязательно";
+        if (value !== formData.newPassword) return "Пароли не совпадают";
+        return "";
+
+      default:
+        return "";
+    }
+  }, [formData.oldPassword, formData.newPassword]);
+
+  // Валидация всей формы
+  const validateForm = useCallback((): boolean => {
+    const newErrors: FormErrors = {
+      oldPassword: validateField("oldPassword", formData.oldPassword),
+      newPassword: validateField("newPassword", formData.newPassword),
+      confirmPassword: validateField("confirmPassword", formData.confirmPassword),
     };
 
-    if (!formData.oldPassword) {
-      newErrors.oldPassword = "Текущий пароль обязателен";
-    }
-
-    if (!formData.newPassword) {
-      newErrors.newPassword = "Новый пароль обязателен";
-    } else if (formData.newPassword.length < 6) {
-      newErrors.newPassword = "Пароль должен быть не менее 6 символов";
-    }
-
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Подтверждение пароля обязательно";
-    } else if (formData.newPassword !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Пароли не совпадают";
-    }
-
     setFormErrors(newErrors);
-    return (
-      !newErrors.oldPassword &&
-      !newErrors.newPassword &&
-      !newErrors.confirmPassword
-    );
-  };
+    return !Object.values(newErrors).some(error => error !== "");
+  }, [formData, validateField]);
+
+  // Автовалидация при изменении данных
+  useEffect(() => {
+    if (Object.values(touched).some(field => field)) {
+      validateForm();
+    }
+  }, [formData, touched, validateForm]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSuccess(false);
+    
+    // Помечаем все поля как touched для показа всех ошибок
+    setTouched({
+      oldPassword: true,
+      newPassword: true,
+      confirmPassword: true,
+    });
+
+    // Дополнительная проверка на одинаковые пароли
+    if (formData.oldPassword === formData.newPassword) {
+      setFormErrors(prev => ({
+        ...prev,
+        newPassword: "Новый пароль должен отличаться от текущего"
+      }));
+      return;
+    }
 
     if (validateForm()) {
       const result = await dispatch(
@@ -71,16 +118,47 @@ export const ChangePasswordForm = () => {
           newPassword: "",
           confirmPassword: "",
         });
+        setTouched({
+          oldPassword: false,
+          newPassword: false,
+          confirmPassword: false,
+        });
+        setFormErrors({
+          oldPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
       }
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    // Сбрасываем ошибку при изменении поля
+    if (formErrors[name as keyof FormErrors]) {
+      setFormErrors(prev => ({
+        ...prev,
+        [name]: "",
+      }));
+    }
   };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { name } = e.target;
+    setTouched(prev => ({
+      ...prev,
+      [name]: true,
+    }));
+  };
+
+  const isFormValid = Object.values(formErrors).every(error => error === "") && 
+                     Object.values(formData).every(field => field.trim() !== "") &&
+                     formData.oldPassword !== formData.newPassword;
 
   return (
     <form onSubmit={handleSubmit} className="password-form">
@@ -93,52 +171,57 @@ export const ChangePasswordForm = () => {
 
       <div className="form-group">
         <label htmlFor="oldPassword">Текущий пароль:</label>
-        <input
-          type="password"
+        <PasswordInput
           id="oldPassword"
           name="oldPassword"
           value={formData.oldPassword}
           onChange={handleChange}
-          required
+          onBlur={handleBlur}
+          placeholder="Текущий пароль"
         />
-        {formErrors.oldPassword && (
+        {formErrors.oldPassword && touched.oldPassword && (
           <span className="field-error">{formErrors.oldPassword}</span>
         )}
       </div>
 
       <div className="form-group">
         <label htmlFor="newPassword">Новый пароль:</label>
-        <input
-          type="password"
+        <PasswordInput
           id="newPassword"
           name="newPassword"
           value={formData.newPassword}
           onChange={handleChange}
-          required
+          onBlur={handleBlur}
+          placeholder="Новый пароль"
         />
-        {formErrors.newPassword && (
+        {formErrors.newPassword && touched.newPassword && (
           <span className="field-error">{formErrors.newPassword}</span>
+        )}
+        {/* Подсказка для пользователя */}
+        {formData.oldPassword && formData.newPassword && 
+         formData.oldPassword === formData.newPassword && touched.newPassword && (
+          <span className="field-error">Новый пароль должен отличаться от текущего</span>
         )}
       </div>
 
       <div className="form-group">
         <label htmlFor="confirmPassword">Подтвердите новый пароль:</label>
-        <input
-          type="password"
+        <PasswordInput
           id="confirmPassword"
           name="confirmPassword"
           value={formData.confirmPassword}
           onChange={handleChange}
-          required
+          onBlur={handleBlur}
+          placeholder="Подтвердите пароль"
         />
-        {formErrors.confirmPassword && (
+        {formErrors.confirmPassword && touched.confirmPassword && (
           <span className="field-error">{formErrors.confirmPassword}</span>
         )}
       </div>
 
       <button
         type="submit"
-        disabled={status === "loading"}
+        disabled={status === "loading" || !isFormValid}
         className="submit-button"
       >
         {status === "loading" ? "Смена пароля..." : "Сменить пароль"}

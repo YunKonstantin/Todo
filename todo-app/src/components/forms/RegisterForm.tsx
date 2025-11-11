@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { registerUser } from "../../store/slices/authSlice";
 import { type AppDispatch, type RootState } from "../../store";
+import  PasswordInput  from "../InputPassword";
 
 export const RegisterForm = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -38,6 +39,8 @@ export const RegisterForm = () => {
       newErrors.password = "Пароль обязателен";
     } else if (formData.password.length < 6) {
       newErrors.password = "Пароль должен быть не менее 6 символов";
+    } else if (formData.password.length > 30) {
+      newErrors.password = "Пароль не может быть длиннее 30 символов";
     }
 
     if (formData.age) {
@@ -94,6 +97,7 @@ export const RegisterForm = () => {
           value={formData.email}
           onChange={handleChange}
           required
+          maxLength={50}
         />
         {formErrors.email && (
           <span className="field-error">{formErrors.email}</span>
@@ -102,13 +106,12 @@ export const RegisterForm = () => {
 
       <div className="form-group">
         <label htmlFor="password">Пароль:</label>
-        <input
-          type="password"
+        <PasswordInput
           id="password"
           name="password"
           value={formData.password}
           onChange={handleChange}
-          required
+          placeholder="Пароль"
         />
         {formErrors.password && (
           <span className="field-error">{formErrors.password}</span>

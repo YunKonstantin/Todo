@@ -20,14 +20,20 @@ interface User {
 interface AuthState {
   user: User | null;
   token: string | null;
-  status: "idle" | "loading" | "failed";
+  status: AuthStateStatus;
   error: string | null;
+}
+export const enum AuthStateStatus  {
+  IDLE = "idle",
+  LOADING = "loading",
+  FAILED = "failed"
+
 }
 
 const initialState: AuthState = {
   user: null,
   token: localStorage.getItem("accessToken"),
-  status: "idle",
+  status: AuthStateStatus.IDLE,
   error: null,
 };
 
@@ -115,31 +121,31 @@ const authSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(registerUser.pending, (state) => {
-        state.status = "loading";
+        state.status = AuthStateStatus.LOADING;
         state.error = null;
       })
       .addCase(registerUser.fulfilled, (state, action) => {
-        state.status = "idle";
+        state.status = AuthStateStatus.IDLE;
         state.user = action.payload.user;
         state.token = action.payload.token;
         state.error = null;
       })
       .addCase(registerUser.rejected, (state, action) => {
-        state.status = "failed";
+        state.status = AuthStateStatus.FAILED;
         state.error = action.payload as string;
       })
       .addCase(loginUser.pending, (state) => {
-        state.status = "loading";
+        state.status = AuthStateStatus.LOADING;
         state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        state.status = "idle";
+        state.status = AuthStateStatus.LOADING;
         state.user = action.payload.user;
         state.token = action.payload.token;
         state.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
-        state.status = "failed";
+        state.status = AuthStateStatus.FAILED;
         state.error = action.payload as string;
       })
       .addCase(fetchUserProfile.fulfilled, (state, action) => {

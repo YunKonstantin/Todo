@@ -2,7 +2,7 @@
   {
     "id": 1761662437328,
     "email": "yunkonstantin@icloud.com",
-    "password": "$2a$10$w5IaMptcbfyyiqHw2xOMDOymtuA0pgGGap5SvVekSzAcVe.eBc58C",
+    "password": "$2a$10$CmpSLAcN09X5bi5PqaUdIOrvp/08BJXqaA5dZtukAHTBFEFr0SGZ6",
     "age": null,
     "createdAt": "2025-10-28T14:40:37.328Z"
   },
@@ -30,7 +30,7 @@
   {
     "id": 1761826553804,
     "email": "wdads@fasfas.ru",
-    "password": "$2a$10$8ifqkh8IjpGCS2Xum5baK.5EB8VWQuvOro5cEvv8sXWJuMi8m2Ab2",
+    "password": "$2a$10$E82N.0pn1c3WHd1YeDB0UukcOMCicmtS5cRhmgk7iDGL6LT50n8X2",
     "age": 32,
     "createdAt": "2025-10-30T12:15:53.804Z"
   },
@@ -54,5 +54,19 @@
     "password": "$2a$10$y6dsDFCZYkmMc.Z7uap4uuZj15OSnBr.3//Y9nd4wxLUsFqnsIkU2",
     "age": 12,
     "createdAt": "2025-11-05T19:22:40.341Z"
+  },
+  {
+    "id": 1762405376828,
+    "email": "fskdmf@icloud.com",
+    "password": "$2a$10$MoZ5bjchQkwA.AkurxydkujTD0UsGg5XRXUEwTy12hdIo.lo53sv.",
+    "age": null,
+    "createdAt": "2025-11-06T05:02:56.828Z"
+  },
+  {
+    "id": 1762885032250,
+    "email": "kkostyan@icloud.com",
+    "password": "$2a$10$Z9u0ofEx0Plt35ryZqM49.FUPAkXXN418DxHgpi0bFRTHi3lKKb/.",
+    "age": null,
+    "createdAt": "2025-11-11T18:17:12.250Z"
   }
 ]
