@@ -39,6 +39,7 @@ export const ChangePasswordForm = () => {
   });
 
   const [success, setSuccess] = useState(false);
+  const [apiError, setApiError] = useState("");
 
   const validateField = useCallback(
     (name: keyof FormData, value: string): string => {
@@ -88,9 +89,17 @@ export const ChangePasswordForm = () => {
     }
   }, [formData, touched, validateForm]);
 
+  // Сбрасываем API ошибку при изменении полей
+  useEffect(() => {
+    if (apiError) {
+      setApiError("");
+    }
+  }, [formData.oldPassword, formData.newPassword, formData.confirmPassword]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSuccess(false);
+    setApiError("");
 
     setTouched({
       oldPassword: true,
@@ -106,7 +115,11 @@ export const ChangePasswordForm = () => {
       return;
     }
 
-    if (validateForm()) {
+    if (!validateForm()) {
+      return;
+    }
+
+    try {
       const result = await dispatch(
         changePassword({
           oldPassword: formData.oldPassword,
@@ -132,10 +145,14 @@ export const ChangePasswordForm = () => {
           confirmPassword: "",
         });
       } else if (changePassword.rejected.match(result)) {
-        // Обрабатываем ошибку от API (например, неверный старый пароль)
-        // Ошибка уже будет в состоянии error из Redux
-        setSuccess(false);
+        // Обрабатываем ошибку от API
+        const errorMessage = result.payload as string || 
+                           result.error?.message || 
+                           "Произошла ошибка при смене пароля";
+        setApiError(errorMessage);
       }
+    } catch (error) {
+      setApiError("Произошла непредвиденная ошибка");
     }
   };
 
@@ -171,7 +188,9 @@ export const ChangePasswordForm = () => {
     <form onSubmit={handleSubmit} className="password-form">
       <h3>Смена пароля</h3>
 
-      {error && <div className="error-message">{error}</div>}
+      {(error || apiError) && (
+        <div className="error-message">{apiError || error}</div>
+      )}
       {success && (
         <div className="success-message">Пароль успешно изменен!</div>
       )}
@@ -204,7 +223,7 @@ export const ChangePasswordForm = () => {
         {formErrors.newPassword && touched.newPassword && (
           <span className="field-error">{formErrors.newPassword}</span>
         )}
-
+        
         {formData.oldPassword &&
           formData.newPassword &&
           formData.oldPassword === formData.newPassword &&
