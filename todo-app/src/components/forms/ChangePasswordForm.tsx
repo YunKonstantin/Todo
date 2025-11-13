@@ -145,10 +145,10 @@ export const ChangePasswordForm = () => {
           confirmPassword: "",
         });
       } else if (changePassword.rejected.match(result)) {
-        // Обрабатываем ошибку от API
-        const errorMessage = result.payload as string || 
-                           result.error?.message || 
-                           "Произошла ошибка при смене пароля";
+        const errorMessage =
+          (result.payload as string) ||
+          result.error?.message ||
+          "Произошла ошибка при смене пароля";
         setApiError(errorMessage);
       }
     } catch (error) {
@@ -223,7 +223,7 @@ export const ChangePasswordForm = () => {
         {formErrors.newPassword && touched.newPassword && (
           <span className="field-error">{formErrors.newPassword}</span>
         )}
-        
+
         {formData.oldPassword &&
           formData.newPassword &&
           formData.oldPassword === formData.newPassword &&
